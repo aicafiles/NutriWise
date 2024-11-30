@@ -1,78 +1,252 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _genderController = TextEditingController();
+  TextEditingController _notesController = TextEditingController();
+  bool _isEditable = false;
+  File? _profileImage;
+  File? _coverImage;
+
+  Future<void> _checkPermissions() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
+    var cameraStatus = await Permission.camera.status;
+    if (!cameraStatus.isGranted) {
+      await Permission.camera.request();
+    }
+  }
+
+  Future<void> _pickImage(bool isProfileImage) async {
+    await _checkPermissions();
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        if (isProfileImage) {
+          _profileImage = File(pickedFile.path);
+        } else {
+          _coverImage = File(pickedFile.path);
+        }
+      });
+    }
+  }
+
+  void _showImageOptions(bool isProfileImage) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo),
+                title: const Text("Upload New Photo"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(isProfileImage);
+                },
+              ),
+              if ((isProfileImage ? _profileImage : _coverImage) != null)
+                ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: const Text("Remove Photo"),
+                  onTap: () {
+                    setState(() {
+                      if (isProfileImage) {
+                        _profileImage = null;
+                      } else {
+                        _coverImage = null;
+                      }
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text("Cancel"),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = "Coco Martin"; // Default name
+    _emailController.text = "coco.martin@example.com";
+    _phoneController.text = "+63 912 345 6789";
+    _genderController.text = "Male";
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile"),
-        centerTitle: true,
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/logo.png',
+              width: 30,
+              height: 30,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Smart Swap',
+              style: TextStyle(
+                fontFamily: 'YesevaOne',
+                fontSize: 20,
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(_isEditable ? Icons.check : Icons.edit),
+            onPressed: () {
+              setState(() {
+                _isEditable = !_isEditable;
+              });
+            },
+          ),
+        ],
       ),
+      backgroundColor: const Color(0xFFF3F3F3),
       body: SingleChildScrollView(
-        child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              CircleAvatar(
-                radius: 60,
-                backgroundImage: const AssetImage("assets/profile.jpg"),
-                backgroundColor: Colors.grey.shade200,
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  GestureDetector(
+                    onTap: () => _showImageOptions(false),
+                    child: Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        image: _coverImage != null
+                            ? DecorationImage(
+                          image: FileImage(_coverImage!),
+                          fit: BoxFit.cover,
+                        )
+                            : const DecorationImage(
+                          image: AssetImage("assets/cover-placeholder.jpg"),
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 20,
+                    top: 140,
+                    child: GestureDetector(
+                      onTap: () => _showImageOptions(true),
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: _profileImage != null
+                            ? FileImage(_profileImage!)
+                            : const AssetImage("assets/profile-placeholder.jpg")
+                        as ImageProvider,
+                        backgroundColor: Colors.grey.shade200,
+                        child: _profileImage == null && _isEditable
+                            ? const Icon(Icons.camera_alt, size: 30, color: Colors.grey)
+                            : null,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 150,
+                    top: 210, // Adjusted lower for better alignment
+                    child: Text(
+                      _nameController.text,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "Coco Martin",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                "cocomartin@example.com",
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement Edit Profile functionality
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 100), // Adjusted spacing
+              if (_isEditable)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildEditableField("Email Address", _emailController),
+                    const SizedBox(height: 15),
+                    _buildEditableField("Phone Number", _phoneController),
+                    const SizedBox(height: 15),
+                    _buildEditableField("Gender", _genderController),
+                  ],
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDisplayField("Email Address", _emailController.text),
+                    const SizedBox(height: 10),
+                    _buildDisplayField("Phone Number", _phoneController.text),
+                    const SizedBox(height: 10),
+                    _buildDisplayField("Gender", _genderController.text),
+                  ],
+                ),
+              const SizedBox(height: 30),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE1F5FE), // Light pastel blue
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                padding: const EdgeInsets.all(12.0),
+                child: TextField(
+                  controller: _notesController,
+                  enabled: _isEditable,
+                  decoration: const InputDecoration(
+                    hintText: "Enter your notes here...",
+                    border: InputBorder.none,
+                  ),
+                  maxLines: 5,
+                  style: const TextStyle(
+                    color: Colors.black87,
                   ),
                 ),
-                child: const Text("Edit Profile", style: TextStyle(fontSize: 16)),
-              ),
-              const SizedBox(height: 30),
-              // Divider
-              const Divider(thickness: 1),
-              const SizedBox(height: 10),
-              // Menu Options
-              ListTile(
-                leading: const Icon(Icons.history, color: Colors.green),
-                title: const Text("Order History"),
-                onTap: () {
-                  // TODO: Navigate to Order History
-                },
-              ),
-              const Divider(thickness: 1),
-              ListTile(
-                leading: const Icon(Icons.settings, color: Colors.green),
-                title: const Text("Settings"),
-                onTap: () {
-                  // TODO: Navigate to Settings
-                },
-              ),
-              const Divider(thickness: 1),
-              ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text("Log Out"),
-                onTap: () {
-                  // TODO: Implement Log Out functionality
-                  _showLogoutConfirmation(context);
-                },
               ),
             ],
           ),
@@ -81,29 +255,45 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Log Out"),
-          content: const Text("Are you sure you want to log out?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
+  Widget _buildEditableField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 5),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: "Enter $label",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            TextButton(
-              onPressed: () {
-                // TODO: Perform log-out actions
-                Navigator.pop(context);
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-              child: const Text("Log Out"),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDisplayField(String label, String value) {
+    return Row(
+      children: [
+        Text(
+          "$label: ",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+      ],
     );
   }
 }
