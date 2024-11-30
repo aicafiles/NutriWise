@@ -13,7 +13,7 @@ class _BeveragesScreenState extends State<BeveragesScreen> {
   late User? _user;
   late FirebaseFirestore _firestore;
   List<DocumentSnapshot> products = [];
-  Set<String> favoriteProducts = Set<String>();
+  Set<String> favoriteProducts = <String>{};
   String selectedCategory = '';
   TextEditingController searchController = TextEditingController();
 
@@ -168,7 +168,7 @@ class _BeveragesScreenState extends State<BeveragesScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Close',
-              style: TextStyle(color: Colors.green),
+              style: TextStyle(fontFamily: 'Poppins',color: Colors.green),
             ),
           ),
         ],
@@ -248,7 +248,7 @@ class _BeveragesScreenState extends State<BeveragesScreen> {
                         borderRadius: BorderRadius.circular(8),
                         child: AspectRatio(
                           aspectRatio: 1,
-                          child: Container(
+                          child: SizedBox(
                             width: 80,
                             height: 80,
                             child: Image.network(
