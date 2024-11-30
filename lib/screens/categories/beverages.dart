@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BeveragesScreen extends StatefulWidget {
   const BeveragesScreen({super.key});
@@ -8,268 +10,178 @@ class BeveragesScreen extends StatefulWidget {
 }
 
 class _BeveragesScreenState extends State<BeveragesScreen> {
+  late User? _user;
+  late FirebaseFirestore _firestore;
+  List<DocumentSnapshot> products = [];
+  Set<String> favoriteProducts = Set<String>();
   String selectedCategory = '';
-  bool isCategorySelected = false;
-  int categoryOffset = 0;
+  TextEditingController searchController = TextEditingController();
 
-  final Map<String, List<Map<String, String>>> products = {
-    'Coffee': [
-      {
-        'name': 'Basilio Coffee',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Coffee/Basilio_Coffee.jpg',
-      },
-      {
-        'name': 'SGD Coffee',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Coffee/SGD_Coffee.png',
-      },
-      {
-        'name': 'Bo\'s Coffee',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Coffee/Bos_Coffee.png',
+  @override
+  void initState() {
+    super.initState();
+    _user = FirebaseAuth.instance.currentUser;
+    _firestore = FirebaseFirestore.instance;
+    _loadFavoriteProducts();
+    _loadAllProducts();
+  }
 
+  void _loadFavoriteProducts() async {
+    if (_user != null) {
+      DocumentSnapshot favoritesSnapshot = await _firestore
+          .collection('Users')
+          .doc(_user!.uid)
+          .collection('Favorites')
+          .doc('favorites')
+          .get();
+      if (favoritesSnapshot.exists) {
+        setState(() {
+          favoriteProducts = Set<String>.from(favoritesSnapshot['productIds']);
+        });
       }
-    ],
+    }
+  }
 
-    'Green Tea': [
-      {
-        'name': 'Yogi Green Tea',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Green_Tea/Yogi_Green_Tea.jpg',
-      },
-      {
-        'name': 'Twinings Green Tea',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Green_Tea/Twinings_Green_Tea.png',
-      },
-      {
-        'name': 'Lipton Matcha',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Green_Tea/Lipton_Matcha.jpg',
-      }
-    ],
+  void _loadAllProducts() async {
+    List<DocumentSnapshot> allProducts = [];
+    List<String> categories = ['Coffee', 'Green Tea', 'Almond Milk', 'Orange Juice', 'Sparkling Water'];
+    for (String category in categories) {
+      QuerySnapshot categorySnapshot = await _firestore
+          .collection('Products')
+          .doc('Beverages')
+          .collection(category)
+          .get();
+      allProducts.addAll(categorySnapshot.docs);
+    }
+    allProducts.sort((a, b) {
+      String nameA = (a.data() as Map<String, dynamic>)['name'] ?? '';
+      String nameB = (b.data() as Map<String, dynamic>)['name'] ?? '';
+      return nameA.compareTo(nameB);
+    });
 
-    'Orange Juice': [
-      {
-        'name': 'Tropicana Pure',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Orange_Juice/Tropicana_Pure.jpg',
-      },
-      {
-        'name': 'Florida\'s Natural',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Orange_Juice/Floridas_Natural.jpg',
-      },
-      {
-        'name': 'Locally Blended',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Orange_Juice/Locally_Blended.jpg',
-
-      }
-    ],
-
-    'Sparkling Water': [
-      {
-        'name': 'San Pellegrino',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Sparkling_Water/San_Pellegrino.jpg',
-      },
-      {
-        'name': 'Perrier',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Sparkling_Water/Perrier.jpg',
-      },
-      {
-        'name': 'Nature\'s Spring',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Sparkling_Water/Natures_Spring.jpg',
-
-      }
-    ],
-
-    'Almond Milk': [
-      {
-        'name': 'Alpro Almond Milk',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Almond_Milk/Alpro_Almond_Milk.jpg',
-      },
-      {
-        'name': 'Pacific Foods',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Almond_Milk/Pacific_Foods.jpg',
-      },
-      {
-        'name': 'Almond Breeze',
-        'description': 'Blah Blah Blah Blah.',
-        'longDescription': 'Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah. Blah Blah Blah Blah.',
-        'image': 'assets/categories/Beverages/Almond_Milk/Almond_Breeze.jpg',
-      },
-    ],
-  };
-
-  final List<String> categories = [
-    'Coffee',
-    'Green Tea',
-    'Orange Juice',
-    'Sparkling Water',
-    'Almond Milk',
-  ];
-
-  Set<String> favoriteProducts = {};
-
-  void toggleFavorite(String productName) {
     setState(() {
-      if (favoriteProducts.contains(productName)) {
-        favoriteProducts.remove(productName);
-      } else {
-        favoriteProducts.add(productName);
-      }
+      products = allProducts;
     });
   }
 
-  List<String> get visibleCategories {
-    final end = categoryOffset + 3;
-    return categories.sublist(categoryOffset, end <= categories.length ? end : categories.length);
-  }
+  void _loadProductsByCategory(String category) async {
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('Products')
+        .doc('Beverages')
+        .collection(category)
+        .get();
+    List<DocumentSnapshot> sortedProducts = querySnapshot.docs;
+    sortedProducts.sort((a, b) {
+      String nameA = (a.data() as Map<String, dynamic>)['name'] ?? '';
+      String nameB = (b.data() as Map<String, dynamic>)['name'] ?? '';
+      return nameA.compareTo(nameB);
+    });
 
-  void showNextCategories() {
     setState(() {
-      if (categoryOffset + 3 < categories.length) {
-        categoryOffset += 3;
-      } else {
-        categoryOffset = 0;
-      }
+      products = sortedProducts;
     });
   }
 
-  void showProductDetails(BuildContext context, Map<String, String> product, String productCategory) {
-    final isFavorite = favoriteProducts.contains(product['name']);
-    showModalBottomSheet(
+  void _toggleFavorite(String productId) {
+    setState(() {
+      if (favoriteProducts.contains(productId)) {
+        favoriteProducts.remove(productId);
+      } else {
+        favoriteProducts.add(productId);
+      }
+    });
+    _updateFavorites();
+  }
+
+  void _updateFavorites() {
+    if (_user != null) {
+      _firestore.collection('Users').doc(_user!.uid).collection('Favorites').doc('favorites').set({
+        'productIds': favoriteProducts.toList(),
+      });
+    }
+  }
+
+  void _searchProducts(String query) {
+    if (query.isEmpty) {
+      if (selectedCategory.isEmpty) {
+        _loadAllProducts();
+      } else {
+        _loadProductsByCategory(selectedCategory);
+      }
+    } else {
+      setState(() {
+        products = products.where((product) {
+          return product['name'].toString().toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      });
+    }
+  }
+
+  void _showProductModal(Map<String, dynamic> product, String category) {
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Product Image
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
-                            product['image'] ?? '',
-                            height: 100,
-                            width: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        // Product Name and Category
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product['name'] ?? '',
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Category: $productCategory',
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Favorite Icon
-                  IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.green,
-                      size: 28,
-                    ),
-                    onPressed: () {
-                      toggleFavorite(product['name'] ?? '');
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Product Long Description
-              Text(
-                product['longDescription'] ?? 'No detailed description available.',
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          product['name'] ?? '',
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (product['image'] != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  product['image'],
+                  height: 150,
+                  fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 20),
-            ],
+            const SizedBox(height: 16),
+            Text(
+              'Category: $category',
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              product['longerDescription'] ?? 'No detailed description available.',
+              textAlign: TextAlign.justify,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(color: Colors.green),
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, String>> productsToDisplay = [];
-
-    if (selectedCategory.isEmpty) {
-      products.forEach((category, productList) {
-        productsToDisplay.addAll(productList);
-      });
-    } else {
-      productsToDisplay = products[selectedCategory] ?? [];
-    }
-
-    productsToDisplay.sort((a, b) => (a['name'] ?? '').compareTo(b['name'] ?? ''));
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 5,
+        elevation: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.green),
           onPressed: () => Navigator.of(context).pop(),
@@ -282,177 +194,143 @@ class _BeveragesScreenState extends State<BeveragesScreen> {
             color: Colors.green,
             fontWeight: FontWeight.bold,
           ),
-        )
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 10, 16.0, 7),
-              child: TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Colors.green),
-                  hintText: 'Search products...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide(color: Colors.green),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 16.0),
+      body: Column(
+        children: [
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search, color: Colors.green),
+                hintText: 'Search products...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: const BorderSide(color: Colors.green),
                 ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
               ),
+              onChanged: _searchProducts,
             ),
-            // Categories Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(
-                        visibleCategories.length,
-                            (index) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                if (selectedCategory == visibleCategories[index]) {
-                                  selectedCategory = '';
-                                  isCategorySelected = false;
-                                } else {
-                                  selectedCategory = visibleCategories[index];
-                                  isCategorySelected = true;
-                                }
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: selectedCategory == visibleCategories[index]
-                                    ? Colors.green
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(color: Colors.green),
-                              ),
-                              child: Text(
-                                visibleCategories[index],
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  color: selectedCategory == visibleCategories[index]
-                                      ? Colors.white
-                                      : Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios, color: Colors.green),
-                    onPressed: showNextCategories,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 1),
-            // Product List
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: productsToDisplay.length,
-              itemBuilder: (context, index) {
-                final product = productsToDisplay[index];
-                final isFavorite = favoriteProducts.contains(product['name']);
-                final productCategory = selectedCategory.isEmpty
-                    ? getCategoryName(product)
-                    : selectedCategory;
+          ),
 
-                return GestureDetector(
-                  onTap: () => showProductDetails(context, product, productCategory),
+          // Category Chips with Padding
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 9.0),
+              child: Row(
+                children: ['Coffee', 'Green Tea', 'Almond Milk', 'Orange Juice', 'Sparkling Water']
+                    .map((category) => _buildCategoryButton(category))
+                    .toList(),
+              ),
+            ),
+          ),
+
+
+          // Products List
+          Expanded(
+            child: ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final productDoc = products[index];
+                final product = productDoc.data() as Map<String, dynamic>;
+                final category = productDoc.reference.parent.id;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
                   child: Card(
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    margin: const EdgeInsets.symmetric(vertical: 7, horizontal: 16),
-                    child: Row(
-                      children: [
-                        // Product Image
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            product['image'] ?? '',
-                            fit: BoxFit.cover,
-                            height: 120,
-                            width: 120,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            child: Image.network(
+                              product['image'] ?? '',
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        // Product Info
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Product Title
-                              Text(
-                                product['name'] ?? '',
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              // Category
-                              if (selectedCategory.isEmpty)
-                                Text(
-                                  'Category: $productCategory',
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              const SizedBox(height: 5),
-                              // Description
-                              Text(
-                                product['description'] ?? '',
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
+                      ),
+                      title: Text(
+                        product['name'] ?? '',
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                        // Favorite Icon
-                        IconButton(
-                          icon: Icon(
-                            isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorite ? Colors.red : Colors.green,
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Category: $category',
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13,
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          onPressed: () => toggleFavorite(product['name'] ?? ''),
+                          Text(
+                            product['description'] ?? '',
+                            style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          favoriteProducts.contains(productDoc.id) ? Icons.favorite : Icons.favorite_border,
+                          color: favoriteProducts.contains(productDoc.id) ? Colors.red : Colors.grey,
                         ),
-                      ],
+                        onPressed: () => _toggleFavorite(productDoc.id),
+                      ),
+                      onTap: () => _showProductModal(product, category),
                     ),
                   ),
                 );
               },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  String getCategoryName(Map<String, String> product) {
-    return products.keys.firstWhere((category) {
-      return products[category]?.contains(product) ?? false;
-    }, orElse: () => '');
+  Widget _buildCategoryButton(String category) {
+    bool isSelected = selectedCategory == category;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? Colors.green[700] : Colors.green[200],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        ),
+        onPressed: () {
+          setState(() {
+            if (selectedCategory == category) {
+              selectedCategory = '';
+              _loadAllProducts();
+            } else {
+              selectedCategory = category;
+              _loadProductsByCategory(category);
+            }
+          });
+        },
+        child: Text(
+          category,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+    );
   }
 }
