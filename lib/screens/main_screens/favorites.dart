@@ -101,6 +101,78 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
+  void _toggleFavorite(String productId) {
+    setState(() {
+      favoriteProductIds.remove(productId);
+      favoriteProducts.removeWhere((product) => product.id == productId);
+    });
+
+    if (_user != null) {
+      _firestore.collection('Users').doc(_user!.uid).collection('Favorites').doc('favorites').set({
+        'productIds': favoriteProductIds,
+      });
+    }
+  }
+
+  void _showProductModal(Map<String, dynamic> product, String category) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          product['name'] ?? '',
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (product['image'] != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  product['image'],
+                  height: 150,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              'Category: $category',
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              product['longerDescription'] ?? 'No detailed description available.',
+              textAlign: TextAlign.justify,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(fontFamily: 'Poppins', color: Colors.green),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,10 +251,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     Icons.favorite,
                     color: Colors.red,
                   ),
-                  onPressed: () {
-                    //
-                  },
+                  onPressed: () => _toggleFavorite(productDoc.id),
                 ),
+                onTap: () => _showProductModal(product, category),
               ),
             ),
           );
