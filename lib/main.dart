@@ -150,7 +150,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   );
                 case '/staples':
                   return MaterialPageRoute(
-                    builder: (context) => const StaplesScreen(),
+                    builder: (context) => StaplesScreen(),
                   );
                 default:
                   return MaterialPageRoute(

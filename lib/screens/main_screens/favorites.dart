@@ -38,7 +38,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           if (favoritesSnapshot.exists) {
             print('Favorites document data: ${favoritesSnapshot.data()}');
 
-            // Extract favorite product IDs from the snapshot
             favoriteProductIds = List<String>.from(favoritesSnapshot['productIds'] ?? []);
             print('Extracted favoriteProductIds: $favoriteProductIds');
 
@@ -49,7 +48,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 'Dairy',
                 'Staples',
                 'Canned',
-                'Spices'
               ];
 
               List<Future<QuerySnapshot>> categoryFutures = [];
@@ -60,7 +58,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   'Snacks': ['Pretzels', 'Trail Mix', 'Granola Bars', 'Popcorn', 'Dark Chocolate'],
                   'Staples': ['Jasmine Rice', 'Spaghetti', 'Orzo', 'Basmati Rice', 'Penne'],
                   'Dairy': ['Cheddar Cheese', 'Greek Yogurt', 'Sliced Turkey', 'Butter', 'Fresh Mozzarella'],
-                  'Spices': ['Salt', 'Pepper', 'Chili Powder', 'Garlic Powder', 'Oregano']
                 };
 
                 for (String subcategory in subcategories[category]!) {
