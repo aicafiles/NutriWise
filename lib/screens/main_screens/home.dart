@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'profile.dart';
 import 'favorites.dart';
-import 'settings.dart';
-import '../utils/contact_us.dart';
+import '../utils/about_us.dart';
 import '../utils/log_out.dart';
 import '../categories/beverages.dart';
 import '../categories/snacks.dart';
@@ -64,9 +63,6 @@ class HomeScreen extends StatelessWidget {
                   case 'Favorites':
                     _navigate(context, const FavoritesScreen());
                     break;
-                  case 'Settings':
-                    _navigate(context, const SettingsScreen());
-                    break;
                   case 'Contact Us':
                     _navigate(context, const ContactUsScreen());
                     break;
@@ -79,7 +75,6 @@ class HomeScreen extends StatelessWidget {
               itemBuilder: (context) => [
                 _buildPopupMenuItem('Profile'),
                 _buildPopupMenuItem('Favorites'),
-                _buildPopupMenuItem('Settings'),
                 _buildPopupMenuItem('Contact Us'),
                 _buildPopupMenuItem('Log Out'),
               ],
@@ -312,8 +307,6 @@ class HomeScreen extends StatelessWidget {
         return Icons.person;
       case 'Favorites':
         return Icons.favorite;
-      case 'Settings':
-        return Icons.settings;
       case 'Contact Us':
         return Icons.contact_mail;
       case 'Log Out':
