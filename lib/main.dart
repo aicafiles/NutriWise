@@ -138,7 +138,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   );
                 case '/canned':
                   return MaterialPageRoute(
-                    builder: (context) => const CannedScreen(),
+                    builder: (context) => CannedScreen(),
                   );
                 case '/dairy':
                   return MaterialPageRoute(
