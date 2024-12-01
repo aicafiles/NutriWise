@@ -146,7 +146,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   );
                 case '/snacks':
                   return MaterialPageRoute(
-                    builder: (context) => const SnacksScreen(),
+                    builder: (context) => SnacksScreen(),
                   );
                 case '/staples':
                   return MaterialPageRoute(

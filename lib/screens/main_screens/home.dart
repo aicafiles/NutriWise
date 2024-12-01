@@ -237,7 +237,7 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     _buildCategoryIcon(context, 'Beverages', 'assets/categories/Beverages/beverages.jpg', const BeveragesScreen()),
-                    _buildCategoryIcon(context, 'Snacks', 'assets/categories/Snacks/snacks.jpg', const SnacksScreen()),
+                    _buildCategoryIcon(context, 'Snacks', 'assets/categories/Snacks/snacks.jpg', SnacksScreen()),
                     _buildCategoryIcon(context, 'Dairy', 'assets/categories/Dairy/dairy.jpg', const DairyScreen()),
                     _buildCategoryIcon(context, 'Staples', 'assets/categories/Staples/staples.jpg', const StaplesScreen()),
                     _buildCategoryIcon(context, 'Canned', 'assets/categories/Canned/canned.jpg', CannedScreen()),
