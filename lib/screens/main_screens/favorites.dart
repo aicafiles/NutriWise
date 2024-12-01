@@ -55,12 +55,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               List<Future<QuerySnapshot>> categoryFutures = [];
               for (String category in categories) {
                 Map<String, List<String>> subcategories = {
-                  'Beverages': ['Coffee', 'Green tea', 'Sparkling water', 'Orange juice', 'Almond Milk'],
-                  'Canned': ['Black beans', 'Tomato paste', 'Coconut milk', 'Tuna', 'Corn'],
-                  'Snacks': ['Pretzels', 'Trail mix', 'Granola bars', 'Popcorn', 'Dark chocolate'],
-                  'Staples': ['Jasmine rice', 'Spaghetti', 'Orzo', 'Basmati rice', 'Penne'],
-                  'Dairy': ['Cheddar cheese', 'Greek yogurt', 'Sliced turkey', 'Butter', 'Fresh mozzarella'],
-                  'Spices': ['Salt', 'Pepper', 'Chili powder', 'Garlic powder', 'Oregano']
+                  'Beverages': ['Coffee', 'Green Tea', 'Sparkling Water', 'Orange Juice', 'Almond Milk'],
+                  'Canned': ['Black Beans', 'Tomato Paste', 'Coconut Milk', 'Tuna', 'Corn'],
+                  'Snacks': ['Pretzels', 'Trail Mix', 'Granola Bars', 'Popcorn', 'Dark Chocolate'],
+                  'Staples': ['Jasmine Rice', 'Spaghetti', 'Orzo', 'Basmati Rice', 'Penne'],
+                  'Dairy': ['Cheddar Cheese', 'Greek Yogurt', 'Sliced Turkey', 'Butter', 'Fresh Mozzarella'],
+                  'Spices': ['Salt', 'Pepper', 'Chili Powder', 'Garlic Powder', 'Oregano']
                 };
 
                 for (String subcategory in subcategories[category]!) {

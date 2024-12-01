@@ -9,7 +9,6 @@ import '../categories/snacks.dart';
 import '../categories/dairy.dart';
 import '../categories/staples.dart';
 import '../categories/canned.dart';
-import '../categories/spices.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -242,7 +241,6 @@ class HomeScreen extends StatelessWidget {
                     _buildCategoryIcon(context, 'Dairy', 'assets/categories/Dairy/dairy.jpg', const DairyScreen()),
                     _buildCategoryIcon(context, 'Staples', 'assets/categories/Staples/staples.jpg', const StaplesScreen()),
                     _buildCategoryIcon(context, 'Canned', 'assets/categories/Canned/canned.jpg', const CannedScreen()),
-                    _buildCategoryIcon(context, 'Spices', 'assets/categories/Spices/spices.jpg', const SpicesScreen()),
                   ],
                 ),
               ),

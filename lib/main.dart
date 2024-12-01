@@ -10,7 +10,6 @@ import 'screens/categories/beverages.dart';
 import 'screens/categories/canned.dart';
 import 'screens/categories/dairy.dart';
 import 'screens/categories/snacks.dart';
-import 'screens/categories/spices.dart';
 import 'screens/categories/staples.dart';
 import 'firebase_options.dart';
 
@@ -148,10 +147,6 @@ class _MainNavigationState extends State<MainNavigation> {
                 case '/snacks':
                   return MaterialPageRoute(
                     builder: (context) => const SnacksScreen(),
-                  );
-                case '/spices':
-                  return MaterialPageRoute(
-                    builder: (context) => const SpicesScreen(),
                   );
                 case '/staples':
                   return MaterialPageRoute(

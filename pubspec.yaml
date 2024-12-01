@@ -42,7 +42,6 @@ flutter:
     - assets/categories/Dairy/dairy.jpg
     - assets/categories/Staples/staples.jpg
     - assets/categories/Canned/canned.jpg
-    - assets/categories/Spices/spices.jpg
 
   fonts:
     - family: YesevaOne
