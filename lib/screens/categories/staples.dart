@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class StaplesScreen extends StatefulWidget {
+  const StaplesScreen({super.key});
+
   @override
   _StaplesScreenState createState() => _StaplesScreenState();
 }

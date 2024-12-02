@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class DairyScreen extends StatefulWidget {
+  const DairyScreen({super.key});
+
   @override
   _DairyScreenState createState() => _DairyScreenState();
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'profile.dart';
 import 'favorites.dart';
 import '../utils/about_us.dart';
@@ -9,6 +10,7 @@ import '../categories/snacks.dart';
 import '../categories/dairy.dart';
 import '../categories/staples.dart';
 import '../categories/canned.dart';
+import 'search.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -98,6 +100,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController searchController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -264,44 +268,42 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 1),
+            const SizedBox(height: 0),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.filter_list, color: Colors.green),
-                      onPressed: () {},
-                    ),
-                    const Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search product',
-                          border: InputBorder.none,
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 1.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search product...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.search, color: Colors.green),
+                          onPressed: () {
+                            if (searchController.text.isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SearchScreen(query: searchController.text),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.search, color: Colors.green),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 18),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: SingleChildScrollView(

@@ -1,112 +1,255 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  final String query;
+
+  const SearchScreen({super.key, required this.query});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final TextEditingController _searchController = TextEditingController();
+  late User? _user;
+  late FirebaseFirestore _firestore;
+  List<DocumentSnapshot> products = [];
+  Set<String> favoriteProducts = <String>{};
 
-  final List<Map<String, String>> products = [
-    {"title": "Apple", "description": "A healthy and tasty fruit.", "image": "assets/apple.jpg"},
-    {"title": "Salad", "description": "Perfect for a balanced diet.", "image": "assets/salad.jpg"},
-    {"title": "Soup", "description": "Nutritious and warm.", "image": "assets/soup.jpg"},
-    {"title": "Pumpkin", "description": "Seasonal pumpkin delight.", "image": "assets/pumpkin.jpg"},
-    {"title": "Hot Chocolate", "description": "Perfect for cold weather.", "image": "assets/hot_chocolate.jpg"},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _user = FirebaseAuth.instance.currentUser;
+    _firestore = FirebaseFirestore.instance;
+    _loadFavoriteProducts();
+    _searchProducts(widget.query);
+  }
 
-  List<Map<String, String>> _searchResults = [];
+  void _loadFavoriteProducts() async {
+    if (_user != null) {
+      DocumentSnapshot favoritesSnapshot = await _firestore
+          .collection('Users')
+          .doc(_user!.uid)
+          .collection('Favorites')
+          .doc('favorites')
+          .get();
+      if (favoritesSnapshot.exists) {
+        setState(() {
+          favoriteProducts = Set<String>.from(favoritesSnapshot['productIds']);
+        });
+      }
+    }
+  }
 
-  void _searchProducts(String query) {
+  void _searchProducts(String query) async {
+    if (query.isEmpty) {
+      _loadAllProducts();
+    } else {
+      List<DocumentSnapshot> filteredProducts = [];
+
+      Map<String, List<String>> subcategories = {
+        'Beverages': ['Coffee', 'Green Tea', 'Sparkling Water', 'Orange Juice', 'Almond Milk'],
+        'Canned': ['Black Beans', 'Tomato Paste', 'Coconut Milk', 'Tuna', 'Corn'],
+        'Snacks': ['Pretzels', 'Trail Mix', 'Granola Bars', 'Popcorn', 'Dark Chocolate'],
+        'Staples': ['Jasmine Rice', 'Spaghetti', 'Orzo', 'Basmati Rice', 'Penne'],
+        'Dairy': ['Cheddar Cheese', 'Greek Yogurt', 'Sliced Turkey', 'Butter', 'Fresh Mozzarella'],
+      };
+
+      QuerySnapshot categoriesSnapshot = await _firestore.collection('Products').get();
+
+      for (var categoryDoc in categoriesSnapshot.docs) {
+        for (var subcategory in subcategories[categoryDoc.id]!) {
+          QuerySnapshot productSnapshot = await _firestore
+              .collection('Products')
+              .doc(categoryDoc.id)
+              .collection(subcategory)
+              .get();
+
+          for (var productDoc in productSnapshot.docs) {
+            Map<String, dynamic> productData = productDoc.data() as Map<String, dynamic>;
+
+            if (productData['name'].toString().toLowerCase().contains(query.toLowerCase())) {
+              filteredProducts.add(productDoc);
+            }
+          }
+        }
+      }
+
+      setState(() {
+        products = filteredProducts;
+      });
+    }
+  }
+
+
+  void _loadAllProducts() async {
+    List<DocumentSnapshot> allProducts = [];
+    QuerySnapshot categoriesSnapshot = await _firestore.collection('Products').get();
+
+    for (var categoryDoc in categoriesSnapshot.docs) {
+      QuerySnapshot categorySnapshot = await _firestore
+          .collection('Products')
+          .doc(categoryDoc.id)
+          .collection('items')
+          .get();
+
+      allProducts.addAll(categorySnapshot.docs);
+    }
+
     setState(() {
-      if (query.isEmpty) {
-        _searchResults = [];
+      products = allProducts;
+    });
+  }
+
+  void _toggleFavorite(String productId) {
+    setState(() {
+      if (favoriteProducts.contains(productId)) {
+        favoriteProducts.remove(productId);
       } else {
-        _searchResults = products
-            .where((product) =>
-                product["title"]!.toLowerCase().contains(query.toLowerCase()) ||
-                product["description"]!.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        favoriteProducts.add(productId);
       }
     });
+    _updateFavorites();
+  }
+
+  void _updateFavorites() {
+    if (_user != null) {
+      _firestore.collection('Users').doc(_user!.uid).collection('Favorites').doc('favorites').set({
+        'productIds': favoriteProducts.toList(),
+      });
+    }
+  }
+
+  void _showProductModal(Map<String, dynamic> product) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          product['name'] ?? '',
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (product['image'] != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  product['image'],
+                  height: 150,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              product['longerDescription'] ?? 'No detailed description available.',
+              textAlign: TextAlign.justify,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(fontFamily: 'Poppins', color: Colors.green),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Search"),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundImage: AssetImage("assets/profile.jpg"), // Replace with user's profile image
+        backgroundColor: Colors.white,
+        elevation: 1,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.green),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Search Results',
+          style: TextStyle(
+            fontFamily: 'YesevaOne',
+            fontSize: 20,
+            color: Colors.green,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final productDoc = products[index];
+                final product = productDoc.data() as Map<String, dynamic>;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: Image.network(
+                              product['image'] ?? '',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        product['name'] ?? '',
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product['description'] ?? '',
+                            style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          favoriteProducts.contains(productDoc.id) ? Icons.favorite : Icons.favorite_border,
+                          color: favoriteProducts.contains(productDoc.id) ? Colors.red : Colors.grey,
+                        ),
+                        onPressed: () => _toggleFavorite(productDoc.id),
+                      ),
+                      onTap: () => _showProductModal(product),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Search Bar
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "Search for products...",
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() {
-                            _searchController.clear();
-                            _searchResults.clear();
-                          });
-                        },
-                      )
-                    : null,
-              ),
-              onChanged: _searchProducts,
-            ),
-            const SizedBox(height: 20),
-            // Search Results
-            Expanded(
-              child: _searchResults.isEmpty
-                  ? Center(
-                      child: Text(
-                        _searchController.text.isEmpty
-                            ? "Start typing to search for products."
-                            : "No results found.",
-                        style: const TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: _searchResults.length,
-                      itemBuilder: (context, index) {
-                        final product = _searchResults[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ListTile(
-                            leading: Image.asset(
-                              product["image"]!,
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                            ),
-                            title: Text(product["title"]!),
-                            subtitle: Text(product["description"]!),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
       ),
     );
   }
