@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:permission_handler/permission_handler.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,25 +13,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+
+  String _gender = "Male";
   bool _isEditable = false;
   File? _profileImage;
   File? _coverImage;
 
-  Future<void> _checkPermissions() async {
-    var status = await Permission.storage.status;
-    if (!status.isGranted) {
-      await Permission.storage.request();
-    }
-    var cameraStatus = await Permission.camera.status;
-    if (!cameraStatus.isGranted) {
-      await Permission.camera.request();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = "Coco Martin";
+    _emailController.text = "coco.martin@example.com";
+    _phoneController.text = "+63 912 345 6789";
   }
 
   Future<void> _pickImage(bool isProfileImage) async {
-    await _checkPermissions();
     final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -46,251 +42,261 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _showImageOptions(bool isProfileImage) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: const Text("Upload New Photo"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(isProfileImage);
-                },
-              ),
-              if ((isProfileImage ? _profileImage : _coverImage) != null)
-                ListTile(
-                  leading: const Icon(Icons.delete),
-                  title: const Text("Remove Photo"),
-                  onTap: () {
-                    setState(() {
-                      if (isProfileImage) {
-                        _profileImage = null;
-                      } else {
-                        _coverImage = null;
-                      }
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text("Cancel"),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController.text = "Coco Martin"; // Default name
-    _emailController.text = "coco.martin@example.com";
-    _phoneController.text = "+63 912 345 6789";
-    _genderController.text = "Male";
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        title: const Text(
+          "Profile",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.green.shade400,
         elevation: 0,
-        title: Row(
-          children: [
-            Image.asset(
-              'assets/logo.png',
-              width: 30,
-              height: 30,
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'Smart Swap',
-              style: TextStyle(
-                fontFamily: 'YesevaOne',
-                fontSize: 20,
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          // Background Gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFE8F5E9), // Soft Mint Green
+                  Color(0xFFDCEDC8), // Pale Olive
+                  Color(0xFF81C784), // Teal Green
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(_isEditable ? Icons.check : Icons.edit),
-            onPressed: () {
-              setState(() {
-                _isEditable = !_isEditable;
-              });
-            },
+          ),
+          // Content
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Cover Image Section
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    GestureDetector(
+                      onTap: () => _pickImage(false),
+                      child: Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                          image: DecorationImage(
+                            image: _coverImage != null
+                                ? FileImage(_coverImage!)
+                                : const AssetImage("assets/cover-placeholder.jpg")
+                            as ImageProvider,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Profile Picture Overlapping Cover
+                    Positioned(
+                      left: 20,
+                      top: 150,
+                      child: GestureDetector(
+                        onTap: () => _pickImage(true),
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundImage: _profileImage != null
+                              ? FileImage(_profileImage!)
+                              : const AssetImage("assets/profile-placeholder.jpg"),
+                          backgroundColor: Colors.grey.shade200,
+                          child: _profileImage == null && _isEditable
+                              ? const Icon(Icons.camera_alt, size: 30, color: Colors.grey)
+                              : null,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 140,
+                      top: 210,
+                      child: Text(
+                        _nameController.text,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 100),
+                // Details Section
+                Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  elevation: 5,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildField(
+                          label: "Email Address",
+                          value: _emailController.text,
+                          controller: _emailController,
+                          editable: _isEditable,
+                        ),
+                        const SizedBox(height: 20),
+                        _buildField(
+                          label: "Phone Number",
+                          value: _phoneController.text,
+                          controller: _phoneController,
+                          editable: _isEditable,
+                        ),
+                        const SizedBox(height: 20),
+                        _buildDropdown(),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Notes Section
+                Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  elevation: 5,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: TextField(
+                      controller: _notesController,
+                      enabled: _isEditable,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        hintText: "Your notes here...",
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                // Save/Cancel Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isEditable
+                            ? () {
+                          setState(() {
+                            _isEditable = false;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Profile saved!")),
+                          );
+                        }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: const Text("Save", style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _isEditable = !_isEditable;
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          side: const BorderSide(color: Colors.green),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: Text(
+                          _isEditable ? "Cancel" : "Edit",
+                          style: const TextStyle(fontSize: 16, color: Colors.green),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
-      ),
-      backgroundColor: const Color(0xFFF3F3F3),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  GestureDetector(
-                    onTap: () => _showImageOptions(false),
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        image: _coverImage != null
-                            ? DecorationImage(
-                          image: FileImage(_coverImage!),
-                          fit: BoxFit.cover,
-                        )
-                            : const DecorationImage(
-                          image: AssetImage("assets/cover-placeholder.jpg"),
-                          fit: BoxFit.cover,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 8,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    top: 140,
-                    child: GestureDetector(
-                      onTap: () => _showImageOptions(true),
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundImage: _profileImage != null
-                            ? FileImage(_profileImage!)
-                            : const AssetImage("assets/profile-placeholder.jpg")
-                        as ImageProvider,
-                        backgroundColor: Colors.grey.shade200,
-                        child: _profileImage == null && _isEditable
-                            ? const Icon(Icons.camera_alt, size: 30, color: Colors.grey)
-                            : null,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 150,
-                    top: 210, // Adjusted lower for better alignment
-                    child: Text(
-                      _nameController.text,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 100), // Adjusted spacing
-              if (_isEditable)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildEditableField("Email Address", _emailController),
-                    const SizedBox(height: 15),
-                    _buildEditableField("Phone Number", _phoneController),
-                    const SizedBox(height: 15),
-                    _buildEditableField("Gender", _genderController),
-                  ],
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildDisplayField("Email Address", _emailController.text),
-                    const SizedBox(height: 10),
-                    _buildDisplayField("Phone Number", _phoneController.text),
-                    const SizedBox(height: 10),
-                    _buildDisplayField("Gender", _genderController.text),
-                  ],
-                ),
-              const SizedBox(height: 30),
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE1F5FE), // Light pastel blue
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                padding: const EdgeInsets.all(12.0),
-                child: TextField(
-                  controller: _notesController,
-                  enabled: _isEditable,
-                  decoration: const InputDecoration(
-                    hintText: "Enter your notes here...",
-                    border: InputBorder.none,
-                  ),
-                  maxLines: 5,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
 
-  Widget _buildEditableField(String label, TextEditingController controller) {
+  Widget _buildField({
+    required String label,
+    required String value,
+    required TextEditingController controller,
+    bool editable = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 5),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: "Enter $label",
-            border: OutlineInputBorder(
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(height: 8),
+        if (editable)
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFF7F8FA),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              hintText: "Enter $label",
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F8FA),
               borderRadius: BorderRadius.circular(10),
             ),
+            child: Text(value, style: const TextStyle(fontSize: 16)),
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildDisplayField(String label, String value) {
-    return Row(
+  Widget _buildDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "$label: ",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 16),
+        const Text("Gender", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: _gender,
+          items: ["Male", "Female", "Other"]
+              .map((gender) => DropdownMenuItem(value: gender, child: Text(gender)))
+              .toList(),
+          onChanged: _isEditable ? (value) => setState(() => _gender = value!) : null,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFF7F8FA),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
       ],
