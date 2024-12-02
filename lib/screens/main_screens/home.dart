@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'profile.dart';
 import 'favorites.dart';
 import '../utils/about_us.dart';
-import '../utils/log_out.dart';
+import '../auth/log_in.dart';
 import '../categories/beverages.dart';
 import '../categories/snacks.dart';
 import '../categories/dairy.dart';
@@ -16,6 +17,82 @@ class HomeScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => screen),
+    );
+  }
+
+  void _showLogOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Confirm Log Out',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to log out?',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              color: Colors.black54,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.green,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        (route) => false,
+                  );
+                } catch (e) {
+                  print("Error during logout: $e");
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              ),
+              child: Text(
+                'Log Out',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -67,7 +144,7 @@ class HomeScreen extends StatelessWidget {
                     _navigate(context, const ContactUsScreen());
                     break;
                   case 'Log Out':
-                    _navigate(context, const LogOutScreen());
+                    _showLogOutDialog(context);
                     break;
                 }
               },

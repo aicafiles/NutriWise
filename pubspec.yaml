@@ -30,10 +30,6 @@ flutter:
     - assets/banner.jpg
     - assets/profile.jpg
     - assets/apple.jpg
-    - assets/salad.jpg
-    - assets/soup.jpg
-    - assets/pumpkin.jpg
-    - assets/hot_chocolate.jpg
     - assets/logo.png
     - assets/login_bg.jpg
     # Categories
