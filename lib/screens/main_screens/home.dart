@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'profile.dart';
 import 'favorites.dart';
 import '../utils/about_us.dart';
@@ -328,10 +327,10 @@ class HomeScreen extends StatelessWidget {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildProductItem('assets/apple.jpg', 'Product 1'),
-                  _buildProductItem('assets/apple.jpg', 'Product 2'),
-                  _buildProductItem('assets/apple.jpg', 'Product 3'),
-                  _buildProductItem('assets/apple.jpg', 'Product 4'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 1', 'Fruits', 'A juicy and delicious apple perfect for snacking.'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 2', 'Fruits', 'Sweet and crunchy, great for a healthy treat.'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 3', 'Fruits', 'An apple a day keeps the doctor away.'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 4', 'Fruits', 'Crisp and tangy, great for salads or baking.'),
                 ],
               ),
             ),
@@ -343,10 +342,10 @@ class HomeScreen extends StatelessWidget {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildProductItem('assets/apple.jpg', 'Seasonal 1'),
-                  _buildProductItem('assets/apple.jpg', 'Seasonal 2'),
-                  _buildProductItem('assets/apple.jpg', 'Seasonal 3'),
-                  _buildProductItem('assets/apple.jpg', 'Seasonal 4'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 1', 'Fruits', 'A juicy and delicious apple perfect for snacking.'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 2', 'Fruits', 'Sweet and crunchy, great for a healthy treat.'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 3', 'Fruits', 'An apple a day keeps the doctor away.'),
+                  _buildProductItem(context, 'assets/apple.jpg', 'Product 4', 'Fruits', 'Crisp and tangy, great for salads or baking.'),
                 ],
               ),
             ),
@@ -434,42 +433,48 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductItem(String imagePath, String label) {
-    return Container(
-      width: 80,
-      margin: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            height: 80,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.green, width: 2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
+  Widget _buildProductItem(BuildContext context, String imagePath, String label, String category, String longDescription) {
+    return GestureDetector(
+      onTap: () {
+        _showProductDialog(context, imagePath, label, category, longDescription);
+      },
+      child: Container(
+        width: 80,
+        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              height: 80,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.green, width: 2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              color: Colors.green,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -485,4 +490,87 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showProductDialog(BuildContext context, String imagePath, String name, String category, String longDescription) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    imagePath,
+                    height: 150,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Category: $category',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  longDescription,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Close',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
