@@ -121,6 +121,7 @@ class _SnacksScreenState extends State<SnacksScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           product['name'] ?? '',
@@ -168,7 +169,7 @@ class _SnacksScreenState extends State<SnacksScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Close',
-              style: TextStyle(fontFamily: 'Poppins',color: Colors.green),
+              style: TextStyle(fontFamily: 'Poppins', color: Colors.green),
             ),
           ),
         ],
@@ -179,6 +180,7 @@ class _SnacksScreenState extends State<SnacksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -198,7 +200,6 @@ class _SnacksScreenState extends State<SnacksScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -216,7 +217,6 @@ class _SnacksScreenState extends State<SnacksScreen> {
             ),
           ),
 
-          // Category Chips with Padding
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Padding(
@@ -229,8 +229,6 @@ class _SnacksScreenState extends State<SnacksScreen> {
             ),
           ),
 
-
-          // Products List
           Expanded(
             child: ListView.builder(
               itemCount: products.length,

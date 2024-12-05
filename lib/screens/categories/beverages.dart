@@ -121,6 +121,7 @@ class _BeveragesScreenState extends State<BeveragesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           product['name'] ?? '',
@@ -168,7 +169,7 @@ class _BeveragesScreenState extends State<BeveragesScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Close',
-              style: TextStyle(fontFamily: 'Poppins',color: Colors.green),
+              style: TextStyle(fontFamily: 'Poppins', color: Colors.green),
             ),
           ),
         ],
@@ -196,109 +197,109 @@ class _BeveragesScreenState extends State<BeveragesScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search, color: Colors.green),
-                hintText: 'Search products...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: const BorderSide(color: Colors.green),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-              ),
-              onChanged: _searchProducts,
-            ),
-          ),
-
-          // Category Chips with Padding
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 9.0),
-              child: Row(
-                children: ['Coffee', 'Green Tea', 'Almond Milk', 'Orange Juice', 'Sparkling Water']
-                    .map((category) => _buildCategoryButton(category))
-                    .toList(),
-              ),
-            ),
-          ),
-
-
-          // Products List
-          Expanded(
-            child: ListView.builder(
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final productDoc = products[index];
-                final product = productDoc.data() as Map<String, dynamic>;
-                final category = productDoc.reference.parent.id;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: SizedBox(
-                            width: 80,
-                            height: 80,
-                            child: Image.network(
-                              product['image'] ?? '',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        product['name'] ?? '',
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Category: $category',
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 13,
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            product['description'] ?? '',
-                            style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(
-                          favoriteProducts.contains(productDoc.id) ? Icons.favorite : Icons.favorite_border,
-                          color: favoriteProducts.contains(productDoc.id) ? Colors.red : Colors.grey,
-                        ),
-                        onPressed: () => _toggleFavorite(productDoc.id),
-                      ),
-                      onTap: () => _showProductModal(product, category),
-                    ),
+      body: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search, color: Colors.green),
+                  hintText: 'Search products...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Colors.green),
                   ),
-                );
-              },
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                ),
+                onChanged: _searchProducts,
+              ),
             ),
-          ),
-        ],
+
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 9.0),
+                child: Row(
+                  children: ['Coffee', 'Green Tea', 'Almond Milk', 'Orange Juice', 'Sparkling Water']
+                      .map((category) => _buildCategoryButton(category))
+                      .toList(),
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final productDoc = products[index];
+                  final product = productDoc.data() as Map<String, dynamic>;
+                  final category = productDoc.reference.parent.id;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: SizedBox(
+                              width: 65,
+                              height: 65,
+                              child: Image.network(
+                                product['image'] ?? '',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          product['name'] ?? '',
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Category: $category',
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 13,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              product['description'] ?? '',
+                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(
+                            favoriteProducts.contains(productDoc.id) ? Icons.favorite : Icons.favorite_border,
+                            color: favoriteProducts.contains(productDoc.id) ? Colors.red : Colors.grey,
+                          ),
+                          onPressed: () => _toggleFavorite(productDoc.id),
+                        ),
+                        onTap: () => _showProductModal(product, category),
+                      ),
+                    ),
+
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

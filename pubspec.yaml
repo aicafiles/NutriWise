@@ -36,7 +36,7 @@ flutter:
   assets:
     - assets/banner.jpg
     - assets/profile.jpg
-    - assets/apple.jpg
+    - assets/apple.jpg # remove
     - assets/logo.png
     - assets/login_bg.jpg
     # Categories
@@ -45,6 +45,16 @@ flutter:
     - assets/categories/Dairy/dairy.jpg
     - assets/categories/Staples/staples.jpg
     - assets/categories/Canned/canned.jpg
+    # Featured
+    - assets/featured/banza.jpg
+    - assets/featured/bulletproof.jpg
+    - assets/featured/kind.png
+    - assets/featured/wildplanet.png
+    # Seasonal
+    - assets/seasonal/califia.png
+    - assets/seasonal/naturebox.jpg
+    - assets/seasonal/siggis.jpg
+    - assets/seasonal/tolerant.jpg
 
   fonts:
     - family: YesevaOne

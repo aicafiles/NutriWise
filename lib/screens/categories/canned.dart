@@ -121,6 +121,7 @@ class _CannedScreenState extends State<CannedScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           product['name'] ?? '',
@@ -168,7 +169,7 @@ class _CannedScreenState extends State<CannedScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Close',
-              style: TextStyle(fontFamily: 'Poppins',color: Colors.green),
+              style: TextStyle(fontFamily: 'Poppins', color: Colors.green),
             ),
           ),
         ],
@@ -179,6 +180,7 @@ class _CannedScreenState extends State<CannedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -198,12 +200,13 @@ class _CannedScreenState extends State<CannedScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
                 prefixIcon: const Icon(Icons.search, color: Colors.green),
                 hintText: 'Search products...',
                 border: OutlineInputBorder(
@@ -216,7 +219,6 @@ class _CannedScreenState extends State<CannedScreen> {
             ),
           ),
 
-          // Category Chips with Padding
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Padding(
@@ -229,73 +231,74 @@ class _CannedScreenState extends State<CannedScreen> {
             ),
           ),
 
-
-          // Products List
           Expanded(
-            child: ListView.builder(
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final productDoc = products[index];
-                final product = productDoc.data() as Map<String, dynamic>;
-                final category = productDoc.reference.parent.id;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: SizedBox(
-                            width: 80,
-                            height: 80,
-                            child: Image.network(
-                              product['image'] ?? '',
-                              fit: BoxFit.cover,
+            child: Container(
+              color: Colors.white,
+              child: ListView.builder(
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final productDoc = products[index];
+                  final product = productDoc.data() as Map<String, dynamic>;
+                  final category = productDoc.reference.parent.id;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: Image.network(
+                                product['image'] ?? '',
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      title: Text(
-                        product['name'] ?? '',
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                        title: Text(
+                          product['name'] ?? '',
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Category: $category',
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 13,
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Category: $category',
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 13,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          Text(
-                            product['description'] ?? '',
-                            style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(
-                          favoriteProducts.contains(productDoc.id) ? Icons.favorite : Icons.favorite_border,
-                          color: favoriteProducts.contains(productDoc.id) ? Colors.red : Colors.grey,
+                            Text(
+                              product['description'] ?? '',
+                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
                         ),
-                        onPressed: () => _toggleFavorite(productDoc.id),
+                        trailing: IconButton(
+                          icon: Icon(
+                            favoriteProducts.contains(productDoc.id) ? Icons.favorite : Icons.favorite_border,
+                            color: favoriteProducts.contains(productDoc.id) ? Colors.red : Colors.grey,
+                          ),
+                          onPressed: () => _toggleFavorite(productDoc.id),
+                        ),
+                        onTap: () => _showProductModal(product, category),
                       ),
-                      onTap: () => _showProductModal(product, category),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],

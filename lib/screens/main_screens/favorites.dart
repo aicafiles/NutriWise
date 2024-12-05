@@ -38,7 +38,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           if (favoritesSnapshot.exists) {
             print('Favorites document data: ${favoritesSnapshot.data()}');
 
-            favoriteProductIds = List<String>.from(favoritesSnapshot['productIds'] ?? []);
+            favoriteProductIds =
+            List<String>.from(favoritesSnapshot['productIds'] ?? []);
             print('Extracted favoriteProductIds: $favoriteProductIds');
 
             if (favoriteProductIds.isNotEmpty) {
@@ -53,11 +54,41 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               List<Future<QuerySnapshot>> categoryFutures = [];
               for (String category in categories) {
                 Map<String, List<String>> subcategories = {
-                  'Beverages': ['Coffee', 'Green Tea', 'Sparkling Water', 'Orange Juice', 'Almond Milk'],
-                  'Canned': ['Black Beans', 'Tomato Paste', 'Coconut Milk', 'Tuna', 'Corn'],
-                  'Snacks': ['Pretzels', 'Trail Mix', 'Granola Bars', 'Popcorn', 'Dark Chocolate'],
-                  'Staples': ['Jasmine Rice', 'Spaghetti', 'Orzo', 'Basmati Rice', 'Penne'],
-                  'Dairy': ['Cheddar Cheese', 'Greek Yogurt', 'Sliced Turkey', 'Butter', 'Fresh Mozzarella'],
+                  'Beverages': [
+                    'Coffee',
+                    'Green Tea',
+                    'Sparkling Water',
+                    'Orange Juice',
+                    'Almond Milk'
+                  ],
+                  'Canned': [
+                    'Black Beans',
+                    'Tomato Paste',
+                    'Coconut Milk',
+                    'Tuna',
+                    'Corn'
+                  ],
+                  'Snacks': [
+                    'Pretzels',
+                    'Trail Mix',
+                    'Granola Bars',
+                    'Popcorn',
+                    'Dark Chocolate'
+                  ],
+                  'Staples': [
+                    'Jasmine Rice',
+                    'Spaghetti',
+                    'Orzo',
+                    'Basmati Rice',
+                    'Penne'
+                  ],
+                  'Dairy': [
+                    'Cheddar Cheese',
+                    'Greek Yogurt',
+                    'Sliced Turkey',
+                    'Butter',
+                    'Fresh Mozzarella'
+                  ],
                 };
 
                 for (String subcategory in subcategories[category]!) {
@@ -66,13 +97,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         .collection('Products')
                         .doc(category)
                         .collection(subcategory)
-                        .where(FieldPath.documentId, whereIn: favoriteProductIds)
+                        .where(
+                        FieldPath.documentId, whereIn: favoriteProductIds)
                         .get(),
                   );
                 }
               }
 
-              List<QuerySnapshot> allFavoriteProductSnapshots = await Future.wait(categoryFutures);
+              List<QuerySnapshot> allFavoriteProductSnapshots = await Future
+                  .wait(categoryFutures);
 
               List<QueryDocumentSnapshot> allFavoriteProducts = [];
               for (var snapshot in allFavoriteProductSnapshots) {
@@ -108,7 +141,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     });
 
     if (_user != null) {
-      _firestore.collection('Users').doc(_user!.uid).collection('Favorites').doc('favorites').set({
+      _firestore.collection('Users').doc(_user!.uid)
+          .collection('Favorites')
+          .doc('favorites')
+          .set({
         'productIds': favoriteProductIds,
       });
     }
@@ -118,7 +154,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         title: Text(
           product['name'] ?? '',
           style: const TextStyle(
@@ -165,7 +204,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Close',
-              style: TextStyle(fontFamily: 'Poppins', color: Colors.green),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.green,
+              ),
             ),
           ),
         ],
@@ -190,74 +232,82 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ),
       ),
-      body: favoriteProducts.isEmpty
-          ? Center(
-        child: Text(
-          'No favorites added yet.',
-          style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
-        ),
-      )
-          : ListView.builder(
-        itemCount: favoriteProducts.length,
-        itemBuilder: (context, index) {
-          final productDoc = favoriteProducts[index];
-          final product = productDoc.data() as Map<String, dynamic>;
-          final category = productDoc.reference.parent.id;
+      body: Container(
+        color: Colors.white,
+        child: favoriteProducts.isEmpty
+            ? Center(
+          child: Text(
+            'No favorites added yet.',
+            style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+          ),
+        )
+            : ListView.builder(
+          itemCount: favoriteProducts.length,
+          itemBuilder: (context, index) {
+            final productDoc = favoriteProducts[index];
+            final product = productDoc.data() as Map<String, dynamic>;
+            final category = productDoc.reference.parent.id;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-            child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.network(
-                      product['image'] ?? '',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                title: Text(
-                  product['name'] ?? '',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Category: $category',
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 13,
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0, vertical: 4.0),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20.0, horizontal: 16.0),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.network(
+                        product['image'] ?? '',
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    Text(
-                      product['description'] ?? '',
-                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                trailing: IconButton(
-                  icon: const Icon(
-                    Icons.favorite,
-                    color: Colors.red,
                   ),
-                  onPressed: () => _toggleFavorite(productDoc.id),
+                  title: Text(
+                    product['name'] ?? '',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Category: $category',
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 13,
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        product['description'] ?? '',
+                        style: const TextStyle(fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(
+                      Icons.favorite,
+                      color: Colors.red,
+                    ),
+                    onPressed: () => _toggleFavorite(productDoc.id),
+                  ),
+                  onTap: () => _showProductModal(product, category),
                 ),
-                onTap: () => _showProductModal(product, category),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

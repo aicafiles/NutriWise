@@ -287,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   List<Widget> _buildProfileFields() {
     return [
-      _buildField("Email Address", _emailController, false),
+      _buildField("Email Address", _emailController, _isEditable),
       _buildField("Phone Number", _phoneController, _isEditable),
       const SizedBox(height: 10),
       const Text(
@@ -295,8 +295,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.grey,
+          fontWeight: FontWeight.bold,
+          color: Colors.green,
         ),
       ),
       const SizedBox(height: 10),
@@ -307,17 +307,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: InputDecoration(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.green),
           ),
           hintText: "Enter your notes here",
+          filled: true,
+          fillColor: const Color(0xFFF7F8FA),
+        ),
+        style: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 14,
+          color: Colors.black87,
         ),
       )
           : Container(
         padding: const EdgeInsets.all(12),
         width: double.infinity,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.grey.shade100,
+          border: Border.all(color: Colors.green.shade100, width: 1),
+          borderRadius: BorderRadius.circular(15),
+          color: const Color(0xFFF7F8FA),
         ),
         child: Text(
           _notesController.text.isNotEmpty
@@ -326,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
-            color: Colors.grey,
+            color: Colors.black87,
           ),
         ),
       ),
@@ -335,9 +343,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         value: _gender,
         onChanged: _isEditable ? (value) => setState(() => _gender = value!) : null,
         decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFFF7F8FA),
           border: _isEditable
               ? OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.green),
           )
               : InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 10),
@@ -347,10 +358,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           value: gender,
           child: Text(
             gender,
-            style: const TextStyle(fontFamily: 'Poppins'),
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              color: Colors.black87,
+            ),
           ),
         ))
             .toList(),
+        style: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 14,
+          color: Colors.black87,
+        ),
+        dropdownColor: Colors.white,
       ),
     ];
   }
@@ -364,8 +385,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
           ),
         ),
         const SizedBox(height: 10),
@@ -373,19 +394,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? TextField(
           controller: controller,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFF7F8FA),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: Colors.green),
             ),
             hintText: "Enter your $label",
+          ),
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            color: Colors.black87,
           ),
         )
             : Container(
           padding: const EdgeInsets.all(12),
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.grey.shade100,
+            border: Border.all(color: Colors.green.shade100, width: 1),
+            borderRadius: BorderRadius.circular(15),
+            color: const Color(0xFFF7F8FA),
           ),
           child: Text(
             controller.text.isNotEmpty
@@ -394,7 +423,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
-              color: Colors.grey,
+              color: Colors.black87,
             ),
           ),
         ),

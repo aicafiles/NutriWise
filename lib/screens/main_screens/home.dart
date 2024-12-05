@@ -149,7 +149,6 @@ class HomeScreen extends StatelessWidget {
                     RenderBox renderBox = context.findRenderObject() as RenderBox;
                     Offset offset = renderBox.localToGlobal(Offset.zero);
 
-                    // Show the menu at the position of the avatar
                     showMenu(
                       context: context,
                       position: RelativeRect.fromLTRB(
@@ -262,26 +261,27 @@ class HomeScreen extends StatelessWidget {
                       child: Image.asset(
                         'assets/banner.jpg',
                         width: double.infinity,
-                        height: 250,
+                        height: 155,
                         fit: BoxFit.cover,
                       ),
                     ),
                     Container(
                       width: double.infinity,
-                      height: 250,
+                      height: 155,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.black.withOpacity(0.6),
                       ),
                     ),
                     Positioned(
-                      top: 60,
+                      top: 30,
                       left: 20,
                       right: 20,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
@@ -292,16 +292,16 @@ class HomeScreen extends StatelessWidget {
                                   'NutriWise',
                                   style: TextStyle(
                                     fontFamily: 'YesevaOne',
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.green,
                                   ),
                                 ),
-                                SizedBox(height: 8),
+                                SizedBox(height: 6),
                                 Text(
                                   'Discover Healthier Grocery Alternatives',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     color: Colors.green,
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
@@ -311,22 +311,27 @@ class HomeScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                          const SizedBox(height: 1),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size(100, 30),
+                                backgroundColor: Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                               ),
-                            ),
-                            child: const Text(
-                              'Explore',
-                              style: TextStyle(
-                                  fontSize: 14,
+
+                              child: const Text(
+                                'Explore',
+                                style: TextStyle(
+                                  fontSize: 12,
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.normal,
+                                ),
                               ),
                             ),
                           ),
@@ -337,6 +342,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 0),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 1.0),
@@ -375,16 +381,18 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 18),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildCategoryIcon(context, 'Beverages', 'assets/categories/Beverages/beverages.jpg', const BeveragesScreen()),
-                    _buildCategoryIcon(context, 'Snacks', 'assets/categories/Snacks/snacks.jpg', SnacksScreen()),
-                    _buildCategoryIcon(context, 'Dairy', 'assets/categories/Dairy/dairy.jpg', DairyScreen()),
-                    _buildCategoryIcon(context, 'Staples', 'assets/categories/Staples/staples.jpg', StaplesScreen()),
-                    _buildCategoryIcon(context, 'Canned', 'assets/categories/Canned/canned.jpg', CannedScreen()),
-                  ],
+              child: Center (
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildCategoryIcon(context, 'Beverages', 'assets/categories/Beverages/beverages.jpg', const BeveragesScreen()),
+                      _buildCategoryIcon(context, 'Snacks', 'assets/categories/Snacks/snacks.jpg', SnacksScreen()),
+                      _buildCategoryIcon(context, 'Dairy', 'assets/categories/Dairy/dairy.jpg', DairyScreen()),
+                      _buildCategoryIcon(context, 'Staples', 'assets/categories/Staples/staples.jpg', StaplesScreen()),
+                      _buildCategoryIcon(context, 'Canned', 'assets/categories/Canned/canned.jpg', CannedScreen()),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -394,14 +402,16 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 8),
             SizedBox(
               height: 120,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 1', 'Fruits', 'A juicy and delicious apple perfect for snacking.'),
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 2', 'Fruits', 'Sweet and crunchy, great for a healthy treat.'),
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 3', 'Fruits', 'An apple a day keeps the doctor away.'),
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 4', 'Fruits', 'Crisp and tangy, great for salads or baking.'),
-                ],
+              child: Center (
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _buildProductItem(context, 'assets/featured/bulletproof.jpg', 'Bulletproof', 'Coffee', 'A juicy and delicious apple perfect for snacking.'),
+                    _buildProductItem(context, 'assets/featured/kind.png', 'Kind', 'Granola Bars', 'Sweet and crunchy, great for a healthy treat.'),
+                    _buildProductItem(context, 'assets/featured/banza.jpg', 'Banza', 'Spaghetti', 'An apple a day keeps the doctor away.'),
+                    _buildProductItem(context, 'assets/featured/wildplanet.png', 'Wildplanet', 'Tuna', 'Crisp and tangy, great for salads or baking.'),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 3),
@@ -409,14 +419,16 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 8),
             SizedBox(
               height: 150,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 1', 'Fruits', 'A juicy and delicious apple perfect for snacking.'),
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 2', 'Fruits', 'Sweet and crunchy, great for a healthy treat.'),
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 3', 'Fruits', 'An apple a day keeps the doctor away.'),
-                  _buildProductItem(context, 'assets/apple.jpg', 'Product 4', 'Fruits', 'Crisp and tangy, great for salads or baking.'),
-                ],
+              child: Center (
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _buildProductItem(context, 'assets/seasonal/califia.png', 'Califia', 'Almond Milk', 'A juicy and delicious apple perfect for snacking.'),
+                    _buildProductItem(context, 'assets/seasonal/naturebox.jpg', 'Nature Box', 'Trail Mix', 'Sweet and crunchy, great for a healthy treat.'),
+                    _buildProductItem(context, 'assets/seasonal/tolerant.jpg', 'Tolerant', 'Penne', 'An apple a day keeps the doctor away.'),
+                    _buildProductItem(context, 'assets/seasonal/siggis.jpg', 'Siggis', 'Yogurt', 'Crisp and tangy, great for salads or baking.'),
+                  ],
+                ),
               ),
             ),
           ],
@@ -477,8 +489,8 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 65,
-              height: 65,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
@@ -487,13 +499,13 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               label,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -509,13 +521,13 @@ class HomeScreen extends StatelessWidget {
         _showProductDialog(context, imagePath, label, category, longDescription);
       },
       child: Container(
-        width: 80,
+        width: 74,
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              height: 80,
+              height: 74,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.green, width: 2),
                 borderRadius: BorderRadius.circular(10),
@@ -536,7 +548,7 @@ class HomeScreen extends StatelessWidget {
                 fontFamily: 'Poppins',
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 11,
               ),
             ),
           ],
@@ -544,6 +556,7 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
 
 
   Widget _buildSectionTitle(String title) {
@@ -570,6 +583,7 @@ void _showProductDialog(BuildContext context, String imagePath, String name, Str
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
+        backgroundColor: Colors.white,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),

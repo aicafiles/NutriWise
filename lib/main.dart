@@ -111,7 +111,7 @@ class _MainNavigationState extends State<MainNavigation> {
       child: Center(
         child: FaIcon(
           icon,
-          color: isSelected ? Colors.green : Colors.white,
+          color: isSelected ? Colors.green : Colors.green.shade500,
           size: isSelected ? 22 : 20,
         ),
       ),
@@ -174,48 +174,51 @@ class _MainNavigationState extends State<MainNavigation> {
         ],
       ),
       bottomNavigationBar: Container(
-        height: 50,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.green.shade500,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: Colors.green.shade700,
-            width: 3,
+        color: Colors.white,
+        child: Container(
+          height: 50,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: Colors.green.shade700,
+              width: 3,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                spreadRadius: 2,
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            GestureDetector(
-              onTap: () => _onItemTapped(0),
-              child: _buildCustomIcon(
-                isSelected: _selectedIndex == 0,
-                icon: Icons.favorite,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              GestureDetector(
+                onTap: () => _onItemTapped(0),
+                child: _buildCustomIcon(
+                  isSelected: _selectedIndex == 0,
+                  icon: Icons.favorite,
+                ),
               ),
-            ),
-            GestureDetector(
-              onTap: () => _onItemTapped(1),
-              child: _buildCustomIcon(
-                isSelected: _selectedIndex == 1,
-                icon: FontAwesomeIcons.home,
+              GestureDetector(
+                onTap: () => _onItemTapped(1),
+                child: _buildCustomIcon(
+                  isSelected: _selectedIndex == 1,
+                  icon: FontAwesomeIcons.home,
+                ),
               ),
-            ),
-            GestureDetector(
-              onTap: () => _onItemTapped(2),
-              child: _buildCustomIcon(
-                isSelected: _selectedIndex == 2,
-                icon: FontAwesomeIcons.userAlt,
+              GestureDetector(
+                onTap: () => _onItemTapped(2),
+                child: _buildCustomIcon(
+                  isSelected: _selectedIndex == 2,
+                  icon: FontAwesomeIcons.userAlt,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
