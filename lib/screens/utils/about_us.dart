@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ContactUsScreen extends StatelessWidget {
-  const ContactUsScreen({super.key});
+class AboutUsScreen extends StatelessWidget {
+  const AboutUsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,30 +19,19 @@ class ContactUsScreen extends StatelessWidget {
           'About Us',
           style: TextStyle(
             fontFamily: 'YesevaOne',
-            fontSize: 22,
+            fontSize: 20,
             color: Colors.green,
             fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                'Find the best food recommendations tailored for you.',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Contact Information Box
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
@@ -51,33 +40,101 @@ class ContactUsScreen extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Welcome to NutriWise!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'At NutriWise, we are dedicated to bringing you the best food recommendations tailored to your needs. Our mission is to make healthy eating easy, accessible, and enjoyable for everyone.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        color: Colors.black87,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildContactRow(
-                      icon: Icons.email,
+                    _buildInfoRow(
+                      icon: Icons.email_outlined,
                       label: 'nutriwisee@gmail.com',
                       iconColor: Colors.green,
                     ),
-                    const SizedBox(height: 16),
-                    _buildContactRow(
-                      icon: Icons.phone,
-                      label: '09761252854',
+                    const Divider(height: 30, thickness: 1, color: Colors.green),
+                    _buildInfoRow(
+                      icon: Icons.phone_outlined,
+                      label: '0976 125 2854',
                       iconColor: Colors.green,
                     ),
-                    const SizedBox(height: 16),
-                    _buildContactRow(
-                      icon: Icons.location_on,
-                      label: 'Golden Country Homes, Alangilan Batangas City',
+                    const Divider(height: 30, thickness: 1, color: Colors.green),
+                    _buildInfoRow(
+                      icon: Icons.location_on_outlined,
+                      label:
+                      'Golden Country Homes, Alangilan Batangas City, Philippines',
                       iconColor: Colors.green,
-                      isAddress: true,  // Flag for address row
+                      isAddress: true,
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  'Our team is committed to innovation and excellence. We are constantly working to improve your experience and ensure that you receive the best recommendations for a healthier, happier lifestyle.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16,
+                    color: Colors.black87,
+                    height: 1.5,
+                  ),
                 ),
               ),
             ],
@@ -87,29 +144,29 @@ class ContactUsScreen extends StatelessWidget {
     );
   }
 
-  // Helper method to build each contact row
-  Widget _buildContactRow({
+  Widget _buildInfoRow({
     required IconData icon,
     required String label,
     required Color iconColor,
     bool isAddress = false,
   }) {
     return Row(
+      crossAxisAlignment:
+      isAddress ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
         Icon(icon, color: iconColor, size: 28),
         const SizedBox(width: 12),
-        // For address, make sure it wraps properly
         Expanded(
           child: Text(
             label,
             style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 16,
-              color: Colors.black,
+              color: Colors.black87,
               fontWeight: FontWeight.w500,
             ),
-            overflow: isAddress ? TextOverflow.visible : TextOverflow.ellipsis,  // Allow address to wrap
-            maxLines: isAddress ? null : 1,  // Allow address to use multiple lines
+            overflow: isAddress ? TextOverflow.visible : TextOverflow.ellipsis,
+            maxLines: isAddress ? null : 1,
           ),
         ),
       ],

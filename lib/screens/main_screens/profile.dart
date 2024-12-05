@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text(
           "Profile",
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'YesevaOne',
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.green,

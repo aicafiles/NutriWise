@@ -143,8 +143,8 @@ class HomeScreen extends StatelessWidget {
                   case 'Favorites':
                     _navigate(context, const FavoritesScreen());
                     break;
-                  case 'Contact Us':
-                    _navigate(context, const ContactUsScreen());
+                  case 'About Us':
+                    _navigate(context, const AboutUsScreen());
                     break;
                   case 'Log Out':
                     _showLogOutDialog(context);
@@ -155,7 +155,7 @@ class HomeScreen extends StatelessWidget {
               itemBuilder: (context) => [
                 _buildPopupMenuItem('Profile'),
                 _buildPopupMenuItem('Favorites'),
-                _buildPopupMenuItem('Contact Us'),
+                _buildPopupMenuItem('About Us'),
                 _buildPopupMenuItem('Log Out'),
               ],
             ),
@@ -385,7 +385,7 @@ class HomeScreen extends StatelessWidget {
         return Icons.person;
       case 'Favorites':
         return Icons.favorite;
-      case 'Contact Us':
+      case 'About Us':
         return Icons.contact_mail;
       case 'Log Out':
         return Icons.logout;
