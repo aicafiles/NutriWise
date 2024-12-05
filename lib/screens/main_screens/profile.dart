@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,13 +23,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditable = false;
   File? _profileImage;
   File? _coverImage;
+  String? _profileImageUrl;
+  String? _coverImageUrl;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
-    _nameController.text = "Coco Martin";
-    _emailController.text = "coco.martin@example.com";
-    _phoneController.text = "+63 912 345 6789";
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      DocumentSnapshot userDoc =
+      await _firestore.collection('Users').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        setState(() {
+          _nameController.text = data['name'] ?? '';
+          _emailController.text = data['email'] ?? user.email ?? '';
+          _phoneController.text = data['phoneNumber'] ?? '';
+          _notesController.text = data['notes'] ?? '';
+          _gender = data['gender'] ?? 'Male';
+          _profileImageUrl = data['profileImage'];
+          _coverImageUrl = data['coverImage'];
+        });
+      }
+    } catch (e) {
+      print("Error loading profile: $e");
+    }
+  }
+
+  Future<String?> _uploadImageToImgur(File imageFile) async {
+    const String clientId = '78f4063bd410e97';
+    try {
+      final url = Uri.parse("https://api.imgur.com/3/image");
+      final request = http.MultipartRequest('POST', url)
+        ..headers['Authorization'] = 'Client-ID $clientId'
+        ..files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final jsonResponse = json.decode(responseBody);
+        return jsonResponse['data']['link'];
+      } else {
+        print("Failed to upload image. Status code: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("Error uploading to Imgur: $e");
+      return null;
+    }
   }
 
   Future<void> _pickImage(bool isProfileImage) async {
@@ -33,22 +88,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final ImagePicker picker = ImagePicker();
       final XFile? pickedFile =
       await picker.pickImage(source: ImageSource.gallery);
+
       if (pickedFile != null) {
-        setState(() {
-          if (isProfileImage) {
-            _profileImage = File(pickedFile.path);
-          } else {
-            _coverImage = File(pickedFile.path);
+        File imageFile = File(pickedFile.path);
+
+        String? uploadedImageUrl = await _uploadImageToImgur(imageFile);
+
+        if (uploadedImageUrl != null) {
+          setState(() {
+            if (isProfileImage) {
+              _profileImage = imageFile;
+              _profileImageUrl = uploadedImageUrl;
+            } else {
+              _coverImage = imageFile;
+              _coverImageUrl = uploadedImageUrl;
+            }
+          });
+
+          final user = _auth.currentUser;
+          if (user != null) {
+            await _firestore.collection('Users').doc(user.uid).update({
+              if (isProfileImage) 'profileImage': _profileImageUrl,
+              if (!isProfileImage) 'coverImage': _coverImageUrl,
+            });
           }
-        });
-      } else {
-        print("No image selected.");
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to upload image.")),
+          );
+        }
       }
     } catch (e) {
       print("Error picking image: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error picking image.")),
+      );
     }
   }
 
+  Future<void> _saveProfile() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      await _firestore.collection('Users').doc(user.uid).set({
+        'name': _nameController.text,
+        'email': _emailController.text,
+        'phoneNumber': _phoneController.text,
+        'notes': _notesController.text,
+        'gender': _gender,
+        'profileImage': _profileImageUrl,
+        'coverImage': _coverImageUrl,
+      }, SetOptions(merge: true));
+
+      setState(() {
+        _isEditable = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profile saved successfully!")),
+      );
+    } catch (e) {
+      print("Error saving profile: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to save profile.")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text(
           "Profile",
           style: TextStyle(
-            fontFamily: 'YesevaOne',
+            fontFamily: 'Poppins',
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.green,
@@ -72,15 +178,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Cover Image
             Stack(
               clipBehavior: Clip.none,
+              alignment: Alignment.center,
               children: [
                 GestureDetector(
-                  onTap: () => _pickImage(false),
+                  onTap: _isEditable ? () => _pickImage(false) : null,
                   child: Container(
-                    height: 200,
+                    height: 100,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
@@ -91,10 +198,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ],
                       image: DecorationImage(
-                        image: _coverImage != null
-                            ? FileImage(_coverImage!)
-                            : const AssetImage(
-                            "assets/banner.jpg")
+                        image: _coverImageUrl != null
+                            ? NetworkImage(_coverImageUrl!)
+                            : const AssetImage("assets/banner.jpg")
                         as ImageProvider,
                         fit: BoxFit.cover,
                       ),
@@ -102,29 +208,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 Positioned(
-                  left: MediaQuery.of(context).size.width / 2 - 60,
-                  top: 150,
+                  top: 50,
                   child: GestureDetector(
-                    onTap: () => _pickImage(true),
+                    onTap: _isEditable ? () => _pickImage(true) : null,
                     child: CircleAvatar(
-                      radius: 60,
-                      backgroundImage: _profileImage != null
-                          ? FileImage(_profileImage!)
-                          : const AssetImage(
-                          "assets/profile.jpg")
+                      radius: 40,
+                      backgroundImage: _profileImageUrl != null
+                          ? NetworkImage(_profileImageUrl!)
+                          : const AssetImage("assets/profile.jpg")
                       as ImageProvider,
                       backgroundColor: Colors.grey.shade200,
-                      child: _profileImage == null && _isEditable
+                      child: _profileImageUrl == null && _isEditable
                           ? const Icon(Icons.camera_alt,
-                          size: 30, color: Colors.grey)
+                          size: 40, color: Colors.grey)
                           : null,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 80),
-            // User Name Section
+            const SizedBox(height: 40),
             Center(
               child: _isEditable
                   ? TextField(
@@ -134,22 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   hintText: "Enter your name",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(color: Colors.green),
                   ),
-                  filled: true,
-                  fillColor: Color(0xFFF7F8FA),
-                ),
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
                 ),
               )
                   : Text(
                 _nameController.text,
-                textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -157,119 +250,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            // Details Section
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              elevation: 5,
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildField(
-                      label: "Email Address",
-                      value: _emailController.text,
-                      controller: _emailController,
-                      editable: _isEditable,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildField(
-                      label: "Phone Number",
-                      value: _phoneController.text,
-                      controller: _phoneController,
-                      editable: _isEditable,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildDropdown(),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Notes Section
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              elevation: 5,
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Notes",
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _notesController,
-                      enabled: _isEditable,
-                      maxLines: 5,
-                      decoration: InputDecoration(
-                        hintText: "Your notes here...",
-                        filled: true,
-                        fillColor: const Color(0xFFF7F8FA),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            const SizedBox(height: 10),
+            ..._buildProfileFields(),
             const SizedBox(height: 30),
-            // Save/Cancel Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _isEditable
-                        ? () {
-                      setState(() {
-                        _isEditable = false;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("Profile saved!")),
-                      );
-                    }
-                        : null,
+                    onPressed: _isEditable ? _saveProfile : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
-                    child: const Text(
-                      "Save",
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: const Text("Save"),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -280,40 +274,88 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _isEditable = !_isEditable;
                       });
                     },
-                    style: OutlinedButton.styleFrom(
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                      side: const BorderSide(color: Colors.green, width: 2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Text(
-                      _isEditable ? "Cancel" : "Edit",
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green,
-                      ),
-                    ),
+                    child: Text(_isEditable ? "Cancel" : "Edit"),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildField({
-    required String label,
-    required String value,
-    required TextEditingController controller,
-    bool editable = false,
-  }) {
+  List<Widget> _buildProfileFields() {
+    return [
+      _buildField("Email Address", _emailController, false),
+      _buildField("Phone Number", _phoneController, _isEditable),
+      const SizedBox(height: 10),
+      const Text(
+        "Notes",
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey,
+        ),
+      ),
+      const SizedBox(height: 10),
+      _isEditable
+          ? TextField(
+        controller: _notesController,
+        maxLines: 6,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          hintText: "Enter your notes here",
+        ),
+      )
+          : Container(
+        padding: const EdgeInsets.all(12),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.grey.shade100,
+        ),
+        child: Text(
+          _notesController.text.isNotEmpty
+              ? _notesController.text
+              : "No notes added.",
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+        ),
+      ),
+      const SizedBox(height: 10),
+      DropdownButtonFormField<String>(
+        value: _gender,
+        onChanged: _isEditable ? (value) => setState(() => _gender = value!) : null,
+        decoration: InputDecoration(
+          border: _isEditable
+              ? OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+          )
+              : InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+        ),
+        items: ["Male", "Female", "Other"]
+            .map((gender) => DropdownMenuItem(
+          value: gender,
+          child: Text(
+            gender,
+            style: const TextStyle(fontFamily: 'Poppins'),
+          ),
+        ))
+            .toList(),
+      ),
+    ];
+  }
+
+  Widget _buildField(String label, TextEditingController controller, bool editable) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -322,99 +364,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey,
           ),
         ),
-        const SizedBox(height: 8),
-        if (editable)
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFF7F8FA),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide.none,
-              ),
-              hintText: "Enter $label",
+        const SizedBox(height: 10),
+        editable
+            ? TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
+            hintText: "Enter your $label",
+          ),
+        )
+            : Container(
+          padding: const EdgeInsets.all(12),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.grey.shade100,
+          ),
+          child: Text(
+            controller.text.isNotEmpty
+                ? controller.text
+                : "No $label added.",
             style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
-              color: Colors.black87,
+              color: Colors.grey,
             ),
-          )
-        else
-          Container(
-            width: double.infinity,
-            padding:
-            const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF7F8FA),
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.green.shade100, width: 1),
-            ),
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Gender",
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
           ),
         ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: _gender,
-          items: ["Male", "Female", "Other"]
-              .map((gender) => DropdownMenuItem(
-            value: gender,
-            child: Text(
-              gender,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ))
-              .toList(),
-          onChanged: _isEditable
-              ? (value) => setState(() => _gender = value!)
-              : null,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFFF7F8FA),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide.none,
-            ),
-          ),
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: Colors.black87,
-          ),
-          dropdownColor: Colors.white,
-        ),
+        const SizedBox(height: 10),
       ],
     );
   }
