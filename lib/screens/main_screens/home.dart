@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'profile.dart';
 import 'favorites.dart';
 import '../utils/about_us.dart';
@@ -127,37 +128,106 @@ class HomeScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: PopupMenuButton<String>(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              icon: const CircleAvatar(
-                radius: 18,
-                backgroundImage: AssetImage('assets/profile.jpg'),
-              ),
-              onSelected: (value) {
-                switch (value) {
-                  case 'Profile':
-                    _navigate(context, const ProfileScreen());
-                    break;
-                  case 'Favorites':
-                    _navigate(context, const FavoritesScreen());
-                    break;
-                  case 'About Us':
-                    _navigate(context, const AboutUsScreen());
-                    break;
-                  case 'Log Out':
-                    _showLogOutDialog(context);
-                    break;
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('Users')
+                  .doc(FirebaseAuth.instance.currentUser?.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return CircleAvatar(
+                    radius: 18,
+                    backgroundImage: AssetImage('assets/profile.jpg'),
+                  );
                 }
+
+                var userDocument = snapshot.data!;
+                String profileImageUrl = userDocument['profileImage'] ?? 'assets/profile.jpg';
+
+                return GestureDetector(
+                  onTap: () {
+                    RenderBox renderBox = context.findRenderObject() as RenderBox;
+                    Offset offset = renderBox.localToGlobal(Offset.zero);
+
+                    // Show the menu at the position of the avatar
+                    showMenu(
+                      context: context,
+                      position: RelativeRect.fromLTRB(
+                        offset.dx,
+                        offset.dy + renderBox.size.height,
+                        0,
+                        0,
+                      ),
+                      items: [
+                        PopupMenuItem<String>(
+                          value: 'Profile',
+                          child: Row(
+                            children: [
+                              Icon(Icons.person, color: Colors.green),
+                              const SizedBox(width: 10),
+                              Text('Profile'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'Favorites',
+                          child: Row(
+                            children: [
+                              Icon(Icons.favorite, color: Colors.green),
+                              const SizedBox(width: 10),
+                              Text('Favorites'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'About Us',
+                          child: Row(
+                            children: [
+                              Icon(Icons.contact_mail, color: Colors.green),
+                              const SizedBox(width: 10),
+                              Text('About Us'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'Log Out',
+                          child: Row(
+                            children: [
+                              Icon(Icons.logout, color: Colors.green),
+                              const SizedBox(width: 10),
+                              Text('Log Out'),
+                            ],
+                          ),
+                        ),
+                      ],
+                      elevation: 8.0,
+                    ).then((value) {
+                      if (value != null) {
+                        switch (value) {
+                          case 'Profile':
+                            _navigate(context, const ProfileScreen());
+                            break;
+                          case 'Favorites':
+                            _navigate(context, const FavoritesScreen());
+                            break;
+                          case 'About Us':
+                            _navigate(context, const AboutUsScreen());
+                            break;
+                          case 'Log Out':
+                            _showLogOutDialog(context);
+                            break;
+                        }
+                      }
+                    });
+                  },
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundImage: profileImageUrl.startsWith('http')
+                        ? NetworkImage(profileImageUrl)
+                        : AssetImage(profileImageUrl) as ImageProvider,
+                  ),
+                );
               },
-              offset: const Offset(0, 50),
-              itemBuilder: (context) => [
-                _buildPopupMenuItem('Profile'),
-                _buildPopupMenuItem('Favorites'),
-                _buildPopupMenuItem('About Us'),
-                _buildPopupMenuItem('Log Out'),
-              ],
             ),
           ),
         ],
@@ -192,13 +262,13 @@ class HomeScreen extends StatelessWidget {
                       child: Image.asset(
                         'assets/banner.jpg',
                         width: double.infinity,
-                        height: 230,
+                        height: 250,
                         fit: BoxFit.cover,
                       ),
                     ),
                     Container(
                       width: double.infinity,
-                      height: 230,
+                      height: 250,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.black.withOpacity(0.6),

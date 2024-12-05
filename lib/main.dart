@@ -69,6 +69,10 @@ class _MainNavigationState extends State<MainNavigation> {
       setState(() {
         _selectedIndex = index;
       });
+
+      if (index == 1) {
+        _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+      }
     }
   }
 
