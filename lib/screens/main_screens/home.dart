@@ -396,39 +396,35 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-            _buildSectionTitle('Featured Products'),
-            const SizedBox(height: 8),
             SizedBox(
-              height: 120,
-              child: Center (
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _buildProductItem(context, 'assets/featured/bulletproof.jpg', 'Bulletproof', 'Coffee', 'A unique blend of high-quality coffee, MCT oil, and grass-fed butter, Bulletproof Coffee offers sustained energy and enhanced focus without the mid-day crash. Known as a staple for keto enthusiasts, it supports cognitive function and can serve as a satisfying breakfast replacement.'),
-                    _buildProductItem(context, 'assets/featured/rxbar.jpeg', 'RXBAR', 'Dark Chocolate', 'Made with real, simple ingredients like egg whites, dates, and almonds, RXBAR delivers a rich dark chocolate flavor with no added sugar. Packed with protein and fiber, it’s a clean, guilt-free snack perfect for on-the-go energy.'),
-                    _buildProductItem(context, 'assets/featured/blackbean.jpg', 'Black Bean', 'Spaghetti', 'Crafted from 100% organic black beans, this gluten-free spaghetti is high in protein and fiber. With a firm texture and nutty flavor, it’s a healthy twist on pasta dishes, ideal for those seeking plant-based alternatives.'),
-                    _buildProductItem(context, 'assets/featured/beehive.jpg', 'Beehive', 'Cheddar Cheese', 'Beehive cheddar is a creamy, artisan cheese made with milk from pasture-raised cows and aged to develop rich, unique flavors. Known for its sustainable practices, it offers creative twists like espresso-infused varieties, making it a standout choice for both taste and quality.'),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 3),
-            _buildSectionTitle('Seasonal Recommendations'),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 150,
-              child: Center (
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _buildProductItem(context, 'assets/seasonal/califia.png', 'Califia', 'Almond Milk', 'This creamy, dairy-free almond milk is unsweetened, making it a perfect choice for smoothies, coffee, or cereal. With a simple ingredient list, it’s a healthy, low-calorie alternative to traditional milk.'),
-                    _buildProductItem(context, 'assets/seasonal/naturebox.jpg', 'Nature Box', 'Trail Mix', 'A delightful mix of nuts, seeds, and dried fruits, this trail mix balances taste and nutrition. It’s perfect for snacking or fueling outdoor adventures, providing natural energy without artificial additives.'),
-                    _buildProductItem(context, 'assets/seasonal/tolerant.jpg', 'Tolerant', 'Penne', 'Made from a single ingredient—red lentils—this pasta is a protein-packed, gluten-free option. With its firm bite and mild flavor, it pairs beautifully with any sauce, offering a nutritious twist to traditional penne.'),
-                    _buildProductItem(context, 'assets/seasonal/siggis.jpg', 'Siggis', 'Yogurt', 'Crafted with simple ingredients, Siggi’s Icelandic-style yogurt is rich and creamy yet low in sugar. It’s packed with protein, making it a wholesome and satisfying snack or breakfast choice.'),
-                  ],
-                ),
+              height: 300,
+              child: Column(
+                children: [
+                  _buildSectionTitle('Featured Products'),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildProductItem(context, 'assets/featured/bulletproof.jpg', 'Bulletproof', 'Coffee', 'A unique blend of high-quality coffee, MCT oil, and grass-fed butter, Bulletproof Coffee offers sustained energy and enhanced focus without the mid-day crash. Known as a staple for keto enthusiasts, it supports cognitive function and can serve as a satisfying breakfast replacement.'),
+                      _buildProductItem(context, 'assets/featured/rxbar.jpeg', 'RXBAR', 'Dark Chocolate', 'Made with real, simple ingredients like egg whites, dates, and almonds, RXBAR delivers a rich dark chocolate flavor with no added sugar. Packed with protein and fiber, it’s a clean, guilt-free snack perfect for on-the-go energy.'),
+                      _buildProductItem(context, 'assets/featured/blackbean.jpg', 'Black Bean', 'Spaghetti', 'Crafted from 100% organic black beans, this gluten-free spaghetti is high in protein and fiber. With a firm texture and nutty flavor, it’s a healthy twist on pasta dishes, ideal for those seeking plant-based alternatives.'),
+                      _buildProductItem(context, 'assets/featured/beehive.jpg', 'Beehive', 'Cheddar Cheese', 'Beehive cheddar is a creamy, artisan cheese made with milk from pasture-raised cows and aged to develop rich, unique flavors. Known for its sustainable practices, it offers creative twists like espresso-infused varieties, making it a standout choice for both taste and quality.'),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSectionTitle('Seasonal Recommendations'),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildProductItem(context, 'assets/seasonal/califia.png', 'Califia', 'Almond Milk', 'This creamy, dairy-free almond milk is unsweetened, making it a perfect choice for smoothies, coffee, or cereal. With a simple ingredient list, it’s a healthy, low-calorie alternative to traditional milk.'),
+                      _buildProductItem(context, 'assets/seasonal/naturebox.jpg', 'Nature Box', 'Trail Mix', 'A delightful mix of nuts, seeds, and dried fruits, this trail mix balances taste and nutrition. It’s perfect for snacking or fueling outdoor adventures, providing natural energy without artificial additives.'),
+                      _buildProductItem(context, 'assets/seasonal/tolerant.jpg', 'Tolerant', 'Penne', 'Made from a single ingredient—red lentils—this pasta is a protein-packed, gluten-free option. With its firm bite and mild flavor, it pairs beautifully with any sauce, offering a nutritious twist to traditional penne.'),
+                      _buildProductItem(context, 'assets/seasonal/siggis.jpg', 'Siggis', 'Yogurt', 'Crafted with simple ingredients, Siggi’s Icelandic-style yogurt is rich and creamy yet low in sugar. It’s packed with protein, making it a wholesome and satisfying snack or breakfast choice.'),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -557,18 +553,19 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.green,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
         ),
       ),
     );
