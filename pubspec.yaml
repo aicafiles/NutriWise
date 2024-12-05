@@ -46,10 +46,10 @@ flutter:
     - assets/categories/Staples/staples.jpg
     - assets/categories/Canned/canned.jpg
     # Featured
-    - assets/featured/banza.jpg
+    - assets/featured/rxbar.jpeg
     - assets/featured/bulletproof.jpg
-    - assets/featured/kind.png
-    - assets/featured/wildplanet.png
+    - assets/featured/blackbean.jpg
+    - assets/featured/beehive.jpg
     # Seasonal
     - assets/seasonal/califia.png
     - assets/seasonal/naturebox.jpg
