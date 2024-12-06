@@ -134,7 +134,7 @@ class HomeScreen extends StatelessWidget {
                   .doc(FirebaseAuth.instance.currentUser?.uid)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (!snapshot.hasData || snapshot.data == null) {
                   return CircleAvatar(
                     radius: 18,
                     backgroundImage: AssetImage('assets/profile.jpg'),
