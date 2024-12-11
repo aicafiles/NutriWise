@@ -45,6 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (userDoc.exists) {
         Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        print("Retrieved user data: $data");
         setState(() {
           _nameController.text = data['name'] ?? '';
           _emailController.text = data['email'] ?? user.email ?? '';
@@ -54,6 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profileImageUrl = data['profileImage'];
           _coverImageUrl = data['coverImage'];
         });
+      } else {
+        print("User document does not exist.");
       }
     } catch (e) {
       print("Error loading profile: $e");
@@ -241,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               )
                   : Text(
-                _nameController.text,
+                _nameController.text.isNotEmpty ? _nameController.text : "Name",
                 style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 22,

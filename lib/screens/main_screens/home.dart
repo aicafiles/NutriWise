@@ -107,6 +107,7 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 5,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
               'assets/logo.png',
@@ -114,35 +115,49 @@ class HomeScreen extends StatelessWidget {
               height: 30,
             ),
             const SizedBox(width: 8),
-            const Text(
-              'Smart Swap',
-              style: TextStyle(
-                fontFamily: 'YesevaOne',
-                fontSize: 20,
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
+            Flexible(
+              child: Text(
+                'Smart Swap',
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'YesevaOne',
+                  fontSize: 20,
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('Users')
                   .doc(FirebaseAuth.instance.currentUser?.uid)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data == null) {
-                  return CircleAvatar(
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircleAvatar(
+                    radius: 18,
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+                  return const CircleAvatar(
                     radius: 18,
                     backgroundImage: AssetImage('assets/profile.jpg'),
                   );
                 }
 
-                var userDocument = snapshot.data!;
-                String profileImageUrl = userDocument['profileImage'] ?? 'assets/profile.jpg';
+                final userDocument = snapshot.data!;
+                final profileImageUrl = userDocument['profileImage'] as String?;
+
+                final String imageToUse = profileImageUrl?.isNotEmpty == true
+                    ? profileImageUrl!
+                    : 'assets/profile.jpg';
 
                 return GestureDetector(
                   onTap: () {
@@ -162,9 +177,16 @@ class HomeScreen extends StatelessWidget {
                           value: 'Profile',
                           child: Row(
                             children: [
-                              Icon(Icons.person, color: Colors.green),
+                              const Icon(Icons.person, color: Colors.green),
                               const SizedBox(width: 10),
-                              Text('Profile'),
+                              Text(
+                                'Profile',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -172,9 +194,16 @@ class HomeScreen extends StatelessWidget {
                           value: 'Favorites',
                           child: Row(
                             children: [
-                              Icon(Icons.favorite, color: Colors.green),
+                              const Icon(Icons.favorite, color: Colors.green),
                               const SizedBox(width: 10),
-                              Text('Favorites'),
+                              Text(
+                                'Favorites',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -182,9 +211,16 @@ class HomeScreen extends StatelessWidget {
                           value: 'About Us',
                           child: Row(
                             children: [
-                              Icon(Icons.contact_mail, color: Colors.green),
+                              const Icon(Icons.contact_mail, color: Colors.green),
                               const SizedBox(width: 10),
-                              Text('About Us'),
+                              Text(
+                                'About Us',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -192,9 +228,16 @@ class HomeScreen extends StatelessWidget {
                           value: 'Log Out',
                           child: Row(
                             children: [
-                              Icon(Icons.logout, color: Colors.green),
+                              const Icon(Icons.logout, color: Colors.green),
                               const SizedBox(width: 10),
-                              Text('Log Out'),
+                              Text(
+                                'Log Out',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -221,9 +264,9 @@ class HomeScreen extends StatelessWidget {
                   },
                   child: CircleAvatar(
                     radius: 18,
-                    backgroundImage: profileImageUrl.startsWith('http')
-                        ? NetworkImage(profileImageUrl)
-                        : AssetImage(profileImageUrl) as ImageProvider,
+                    backgroundImage: imageToUse.startsWith('http')
+                        ? NetworkImage(imageToUse)
+                        : AssetImage(imageToUse) as ImageProvider,
                   ),
                 );
               },
@@ -231,6 +274,8 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+
+
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
@@ -301,10 +346,10 @@ class HomeScreen extends StatelessWidget {
                                 Text(
                                   'Discover Healthier Grocery Alternatives',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     color: Colors.green,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w600,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -353,6 +398,11 @@ class HomeScreen extends StatelessWidget {
                       controller: searchController,
                       decoration: InputDecoration(
                         hintText: 'Search product...',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                           borderSide: BorderSide(color: Colors.green),
