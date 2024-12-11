@@ -551,7 +551,7 @@ class HomeScreen extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -594,7 +594,7 @@ class HomeScreen extends StatelessWidget {
                 fontFamily: 'Poppins',
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
-                fontSize: 11,
+                fontSize: 12,
               ),
             ),
           ],

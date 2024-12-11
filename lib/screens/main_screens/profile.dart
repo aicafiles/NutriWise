@@ -166,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text(
           "Profile",
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'YesevaOne',
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.green,
@@ -230,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 35),
             Center(
               child: _isEditable
                   ? TextField(
@@ -265,6 +265,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(vertical: 15),
+                      textStyle: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
                     ),
                     child: const Text("Save"),
                   ),
@@ -277,6 +283,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _isEditable = !_isEditable;
                       });
                     },
+                    style: OutlinedButton.styleFrom(
+                      textStyle: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
                     child: Text(_isEditable ? "Cancel" : "Edit"),
                   ),
                 ),
@@ -310,7 +324,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: InputDecoration(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide(color: Colors.green),
+            borderSide: BorderSide(
+              color: Colors.green, 
+              width: 2, 
+            ),
           ),
           hintText: "Enter your notes here",
           filled: true,
@@ -326,7 +343,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(12),
         width: double.infinity,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.green.shade100, width: 1),
+          border: Border.all(
+            color: Colors.green, 
+            width: 2, 
+          ),
           borderRadius: BorderRadius.circular(15),
           color: const Color(0xFFF7F8FA),
         ),
@@ -347,34 +367,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onChanged: _isEditable ? (value) => setState(() => _gender = value!) : null,
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color(0xFFF7F8FA),
-          border: _isEditable
-              ? OutlineInputBorder(
+          fillColor: const Color(0xFFE8F5E9),
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide(color: Colors.green),
-          )
-              : InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+            borderSide: BorderSide(color: Colors.green, width: 2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.green, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
         ),
         items: ["Male", "Female", "Other"]
             .map((gender) => DropdownMenuItem(
-          value: gender,
-          child: Text(
-            gender,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
-        ))
+                  value: gender,
+                  child: Text(
+                    gender,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ))
             .toList(),
         style: const TextStyle(
           fontFamily: 'Poppins',
           fontSize: 14,
           color: Colors.black87,
         ),
-        dropdownColor: Colors.white,
+        dropdownColor: const Color(0xFFF1F8E9),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: Colors.green,
+        ),
+        isExpanded: true,
       ),
     ];
   }
@@ -395,41 +422,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 10),
         editable
             ? TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFFF7F8FA),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.green),
-            ),
-            hintText: "Enter your $label",
-          ),
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: Colors.black87,
-          ),
-        )
+                controller: controller,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFF7F8FA),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Colors.green,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Colors.green,
+                      width: 2,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Colors.green, 
+                      width: 2,
+                    ),
+                  ),
+                  hintText: "Enter your $label",
+                ),
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              )
             : Container(
-          padding: const EdgeInsets.all(12),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.green.shade100, width: 1),
-            borderRadius: BorderRadius.circular(15),
-            color: const Color(0xFFF7F8FA),
-          ),
-          child: Text(
-            controller.text.isNotEmpty
-                ? controller.text
-                : "No $label added.",
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
-        ),
+                padding: const EdgeInsets.all(12),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.green,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                  color: const Color(0xFFF7F8FA),
+                ),
+                child: Text(
+                  controller.text.isNotEmpty
+                      ? controller.text
+                      : "No $label added.",
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
         const SizedBox(height: 10),
       ],
     );
