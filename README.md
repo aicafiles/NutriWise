@@ -1,39 +1,42 @@
 # NutriWise
 
-**NutriWise** is an app dedicated to helping users make informed choices about the food products they consume. The app features eco-friendly, healthy, and green products, empowering users to make better purchasing decisions.
+## About
+NutriWise is a mobile app that helps users discover healthy, eco-friendly food products across various categories. It aims to empower individuals to make informed, sustainable food choices. Ideal for anyone interested in nutrition, sustainability, and conscious consumption.
 
----
+## Key Features
 
-## Table of Contents 📚
+* Email-based login and signup
+* Browse products by category (Beverages, Snacks, Dairy, etc.)
+* Search for products by name or filter by category
+* View detailed product information (name, description, image)
+* Add products to favorites for quick access
+* Edit user profile and update profile picture
 
-- [NutriWise](#nutriwise)
-  - [Table of Contents 📚](#table-of-contents-)
-  - [About 📑](#about-)
-  - [Features ✨](#features-)
-  - [Technologies Used ⚙️](#technologies-used-️)
+## Tech Stack
 
----
+* **Flutter** — UI toolkit 
+* **Dart** — Programming language
+* **Firebase** — Backend services
+* **Imgur** — Image hosting
 
-## About 📑
+## Getting Started
 
-NutriWise allows users to explore various **healthy, eco-friendly food products** across multiple categories such as Beverages, Snacks, Dairy, and more. Users can search products by name or category and easily access detailed information, including descriptions, images, and the product's sustainability credentials.
+1. Clone or download this repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```sh
+   flutter pub get
+   ```
+4. Run the app:
+   ```sh
+   flutter run
+   ```
 
----
+## Usage Notes
 
-## Features ✨
+1. Launch the app and sign up or log in with your email.
+2. Browse categories or use the search bar to find products.
+3. Tap a product to view its details.
+4. Tap the heart icon to add products to your favorites.
+5. Access your profile to edit personal details or update your profile picture.
 
-1. **Login/Signup**: Upon opening the app, users are prompted to log in or sign up with their email.
-2. **Browse Categories**: After logging in, users can explore product categories like Beverages, Snacks, Dairy, etc.
-3. **Search**: Users can search for products by typing product names or filter by category.
-4. **View Product Details**: Tap on a product to view its name, description, and image.
-5. **Favorites**: Click the heart icon to add a product to your favorites. The app updates this list in real-time.
-6. **Profile**: Users can edit their profile, including updating their personal details and profile picture.
-
----
-
-## Technologies Used ⚙️
-
-- **Flutter**: For building the app's UI.
-- **Dart**: Programming language used to develop the app.
-- **Firebase**: Used for authentication and database management.
-- **Imgur**: Utilized for product images.
